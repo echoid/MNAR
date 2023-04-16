@@ -10,6 +10,7 @@ from MIWAE import MIWAE
 from notMIWAE import notMIWAE
 import trainer
 import utils
+from missing_util import introduce_mising
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 
 from sklearn.impute import SimpleImputer
@@ -18,19 +19,7 @@ from sklearn.impute import IterativeImputer
 from sklearn.ensemble import RandomForestRegressor
 
 
-def introduce_mising(X):
-    N, D = X.shape
-    Xnan = X.copy()
 
-    # ---- MNAR in D/2 dimensions
-    mean = np.mean(Xnan[:, :int(D / 2)], axis=0)
-    ix_larger_than_mean = Xnan[:, :int(D / 2)] > mean
-    Xnan[:, :int(D / 2)][ix_larger_than_mean] = np.nan
-
-    Xz = Xnan.copy()
-    Xz[np.isnan(Xnan)] = 0
-
-    return Xnan, Xz
 
 
 # ---- data settings
@@ -81,6 +70,7 @@ for _ in range(runs):
 
     # ---- introduce missing process
     Xnan, Xz = introduce_mising(Xtrain)
+    # mask
     S = np.array(~np.isnan(Xnan), dtype=np.float)
     Xval, Xvalz = introduce_mising(Xval_org)
 
@@ -106,38 +96,38 @@ for _ in range(runs):
     # ---- find imputation RMSE
     RMSE_notmiwae.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
 
-    # ------------------------- #
-    # ---- mean imputation ---- #
-    # ------------------------- #
-    imp = SimpleImputer(missing_values=np.nan, strategy='mean')
-    imp.fit(Xnan)
-    Xrec = imp.transform(Xnan)
-    RMSE_mean.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
+    # # ------------------------- #
+    # # ---- mean imputation ---- #
+    # # ------------------------- #
+    # imp = SimpleImputer(missing_values=np.nan, strategy='mean')
+    # imp.fit(Xnan)
+    # Xrec = imp.transform(Xnan)
+    # RMSE_mean.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
 
-    # ------------------------- #
-    # ---- mice imputation ---- #
-    # ------------------------- #
-    imp = IterativeImputer(max_iter=10, random_state=0)
-    imp.fit(Xnan)
-    Xrec = imp.transform(Xnan)
-    RMSE_mice.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
+    # # ------------------------- #
+    # # ---- mice imputation ---- #
+    # # ------------------------- #
+    # imp = IterativeImputer(max_iter=10, random_state=0)
+    # imp.fit(Xnan)
+    # Xrec = imp.transform(Xnan)
+    # RMSE_mice.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
 
-    # ------------------------------- #
-    # ---- missForest imputation ---- #
-    # ------------------------------- #
-    estimator = RandomForestRegressor(n_estimators=100)
-    imp = IterativeImputer(estimator=estimator)
-    imp.fit(Xnan)
-    Xrec = imp.transform(Xnan)
-    RMSE_RF.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
+    # # ------------------------------- #
+    # # ---- missForest imputation ---- #
+    # # ------------------------------- #
+    # estimator = RandomForestRegressor(n_estimators=100)
+    # imp = IterativeImputer(estimator=estimator)
+    # imp.fit(Xnan)
+    # Xrec = imp.transform(Xnan)
+    # RMSE_RF.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
 
-    print('RMSE, MIWAE {0:.5f}, notMIWAE {1:.5f}, MEAN {2:.5f}, MICE {3:.5f}, missForest {4:.5f}'
-          .format(RMSE_miwae[-1], RMSE_notmiwae[-1], RMSE_mean[-1], RMSE_mice[-1], RMSE_RF[-1]))
+    # print('RMSE, MIWAE {0:.5f}, notMIWAE {1:.5f}, MEAN {2:.5f}, MICE {3:.5f}, missForest {4:.5f}'
+    #       .format(RMSE_miwae[-1], RMSE_notmiwae[-1], RMSE_mean[-1], RMSE_mice[-1], RMSE_RF[-1]))
 
 
 print("RMSE_miwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_miwae), np.std(RMSE_miwae)))
 print("RMSE_notmiwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae), np.std(RMSE_notmiwae)))
-print("RMSE_mean = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mean), np.std(RMSE_mean)))
-print("RMSE_mice = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mice), np.std(RMSE_mice)))
-print("RMSE_missForest = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_RF), np.std(RMSE_RF)))
+# print("RMSE_mean = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mean), np.std(RMSE_mean)))
+# print("RMSE_mice = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mice), np.std(RMSE_mice)))
+# print("RMSE_missForest = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_RF), np.std(RMSE_RF)))
 
