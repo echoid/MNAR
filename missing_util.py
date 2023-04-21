@@ -17,7 +17,9 @@ def introduce_mising(X):
     # ---- MNAR in D/2 dimensions
     mean = np.mean(Xnan[:, :int(D / 2)], axis=0)
     q3 = np.quantile(Xnan[:, :int(D / 2)],0.75, axis=0)
+    q1 = np.quantile(Xnan[:, :int(D / 2)],0.25, axis=0)
     ix_larger_than_mean = Xnan[:, :int(D / 2)] > q3
+    #ix_larger_than_mean = Xnan[:, :int(D / 2)] > mean
     Xnan[:, :int(D / 2)][ix_larger_than_mean] = np.nan
 
     Xz = Xnan.copy()
@@ -26,13 +28,33 @@ def introduce_mising(X):
     return Xnan, Xz
 
 
+def introduce_mising_middle(X):
+    N, D = X.shape
+    Xnan = X.copy()
+
+    # using mean as indicator
+    # ---- MNAR in D/2 dimensions
+
+    q3 = np.quantile(Xnan[:, :D],0.75, axis=0)
+    q1 = np.quantile(Xnan[:, :D],0.25, axis=0)
+    ix_q3 = Xnan[:, :D] > q3
+    ix_q1 = Xnan[:, :D] < q1
+    #ix_larger_than_mean = Xnan[:, :int(D / 2)] > mean
+    Xnan[:, :D][ix_q3] = np.nan
+    Xnan[:, :D][ix_q1] = np.nan
+
+    Xz = Xnan.copy()
+    Xz[np.isnan(Xnan)] = 0
+
+    return Xnan, Xz
+
 
 def introduce_mising_advanced(X, p, missing_mecha):
     N, D = X.shape
     Xnan = X.copy()
 
 
-    X_miss_mcar = produce_NA(X, p_miss=p, mecha= missing_mecha)
+    X_miss_mcar = produce_NA(X, p_miss=p, mecha= missing_mecha,opt = "selfmasked")
 
     Xnan = X_miss_mcar['X_incomp'].numpy()
     Xz = Xnan.copy()
@@ -42,33 +64,29 @@ def introduce_mising_advanced(X, p, missing_mecha):
 
 
 
-def preprocessing(url):
-    # ---- load data
-
-    data = np.array(pd.read_csv(url, low_memory=False, sep=';'))
-
-    # ---- drop the classification attribute
-    data = data[:, :-1]
-    # ----
-
-    N, D = data.shape
-
+def read_data(url):
     
+    url1 = "https://archive.ics.uci.edu/ml/machine-learning-databases/00267/data_banknote_authentication.txt"
 
-    dl = D - 1
+    url2 = "https://archive.ics.uci.edu/ml/machine-learning-databases/concrete/compressive/Concrete_Data.xls"
 
-    # ---- standardize data
-    data = data - np.mean(data, axis=0)
-    data = data / np.std(data, axis=0)
+    url3 = "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv"
 
-    # ---- random permutation
-    p = np.random.permutation(N)
-    data = data[p, :]
+    url4= "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
+    
+    if url == "url1":
+        data = np.array(pd.read_csv(url1, low_memory=False, sep=','))
 
-    Xtrain = data.copy()
-    Xval_org = data.copy()
+    if url == "url2":
+        data = np.array(pd.read_excel(url2))
 
-    return data.shape, Xtrain, Xval_org, dl
+    if url == "url3":
+        data = np.array(pd.read_csv(url3, low_memory=False, sep=';'))
+
+    if url == "url4":
+        data = np.array(pd.read_csv(url4, low_memory=False, sep=';'))
+
+    return data
 
 
 
@@ -122,3 +140,33 @@ def produce_NA(X, p_miss, mecha="MCAR", opt=None, p_obs=0.2, q=None):
     X_nas[mask.bool()] = np.nan
     
     return {'X_init': X.double(), 'X_incomp': X_nas.double(), 'mask': mask}
+
+
+
+def preprocessing(url):
+    # ---- load data
+
+    data = read_data(url)
+
+    # ---- drop the classification attribute
+    data = data[:, :-1]
+    # ----
+
+    N, D = data.shape
+
+    
+
+    dl = D - 1
+
+    # ---- standardize data
+    data = data - np.mean(data, axis=0)
+    data = data / np.std(data, axis=0)
+
+    # ---- random permutation
+    p = np.random.permutation(N)
+    data = data[p, :]
+
+    Xtrain = data.copy()
+    Xval_org = data.copy()
+
+    return data.shape, Xtrain, Xval_org, dl
