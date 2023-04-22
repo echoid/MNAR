@@ -12,6 +12,7 @@ import trainer
 import utils
 from missing_util import preprocessing,introduce_mising_advanced,missing_by_range
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+import json
 
 from sklearn.impute import SimpleImputer
 from sklearn.experimental import enable_iterative_imputer
@@ -48,110 +49,116 @@ url4= "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/wi
 
 # ---- number of runs
 runs = 3
-RMSE_miwae = []
-RMSE_notmiwae = []
-RMSE_notmiwae_selfmasking = []
-RMSE_notmiwae_linear = []
-RMSE_mean = []
-RMSE_mice = []
-RMSE_RF = []
+
 
 
 dataset = sys.argv[1]
 # dataset = ["banknote","concrete","white","red"]
 mechanism = sys.argv[2]
+json_name = sys.argv[3]
 # mechanism = ["MAR","MCAR","MNAR"]
 
 
-multiple_block = {1:{"lower": 0.5,"upper":1,"partial_missing":0.}
-                  #,2:{"lower": 0.5,"upper":0.6,"partial_missing":0.}
-                  #,3:{"lower": 0.8,"upper":0.9,"partial_missing":0.}
-                  }
+# multiple_block = {1:{"lower": 0.5,"upper":1,"partial_missing":0.}
+#                   #,2:{"lower": 0.5,"upper":0.6,"partial_missing":0.}
+#                   #,3:{"lower": 0.8,"upper":0.9,"partial_missing":0.}
+#                   }
+
+with open('missing_mech/{}.json'.format(json_name)) as f:
+    multiple_blocks = json.load(f)
 
 
-for _ in range(runs):
+def run_one(multiple_block):
 
-    data_shape, Xtrain,Xval_org, dl = preprocessing(dataset)
-
-    # ---- introduce missing process
-    Xnan, Xz = missing_by_range(Xtrain, multiple_block)
-    #Xnan, Xz =introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
-    # mask
-    S = np.array(~np.isnan(Xnan), dtype=np.float)
-    Xval, Xvalz = missing_by_range(Xtrain, multiple_block)
-    #Xval, Xvalz = introduce_mising_advanced(Xtrain, 0.8 , "MNAR")
-
-    # ------------------- #
-    # ---- fit MIWAE ---- #
-    # ------------------- #
-    miwae = MIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, name=name)
-
-    # ---- do the training
-    trainer.train(miwae, batch_size=batch_size, max_iter=max_iter, name=name + 'miwae')
-
-    # ---- find imputation RMSE
-    RMSE_miwae.append(utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)[0])
-
-    # ---------------------- #
-    # ---- fit not-MIWAE---- #
-    # ---------------------- #
-    notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="selfmasking_known", name=name)
-
-    # ---- do the training
-    trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
-
-    # ---- find imputation RMSE
-    RMSE_notmiwae.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
+    RMSE_miwae = []
+    RMSE_notmiwae = []
+    RMSE_notmiwae_selfmasking = []
+    RMSE_notmiwae_linear = []
+    RMSE_mean = []
 
 
-    # ---------------------- #
-    # ---- fit not-MIWAE---- #
-    # ---------------------- #
-    notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="selfmasking", name=name)
+    # for _ in range(runs):
 
-    # ---- do the training
-    trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
+    #     data_shape, Xtrain,Xval_org, dl = preprocessing(dataset)
 
-    # ---- find imputation RMSE
-    RMSE_notmiwae_selfmasking.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
+    #     # ---- introduce missing process
+    #     Xnan, Xz = missing_by_range(Xtrain, multiple_block)
+    #     #Xnan, Xz =introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
+    #     # mask
+    #     S = np.array(~np.isnan(Xnan), dtype=np.float)
+    #     Xval, Xvalz = missing_by_range(Xtrain, multiple_block)
+    #     #Xval, Xvalz = introduce_mising_advanced(Xtrain, 0.8 , "MNAR")
 
+    #     # ------------------- #
+    #     # ---- fit MIWAE ---- #
+    #     # ------------------- #
+    #     miwae = MIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, name=name)
 
-    # ---------------------- #
-    # ---- fit not-MIWAE---- #
-    # ---------------------- #
-    notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="linear", name=name)
+    #     # ---- do the training
+    #     trainer.train(miwae, batch_size=batch_size, max_iter=max_iter, name=name + 'miwae')
 
-    # ---- do the training
-    trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
+    #     # ---- find imputation RMSE
+    #     RMSE_miwae.append(utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)[0])
 
-    # ---- find imputation RMSE
-    RMSE_notmiwae_linear.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
+    #     # ---------------------- #
+    #     # ---- fit not-MIWAE---- #
+    #     # ---------------------- #
+    #     notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="selfmasking_known", name=name)
 
+    #     # ---- do the training
+    #     trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
-
-    # ------------------------- #
-    # ---- mean imputation ---- #
-    # ------------------------- #
-    imp = SimpleImputer(missing_values=np.nan, strategy='mean')
-    imp.fit(Xnan)
-    Xrec = imp.transform(Xnan)
-    RMSE_mean.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
-
-
-
+    #     # ---- find imputation RMSE
+    #     RMSE_notmiwae.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
 
 
+    #     # ---------------------- #
+    #     # ---- fit not-MIWAE---- #
+    #     # ---------------------- #
+    #     notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="selfmasking", name=name)
 
-print("Data Set:",dataset, mechanism)
-print("Data Shape: ", data_shape)
-print("Missing Block", multiple_block)
+    #     # ---- do the training
+    #     trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
-print("RMSE_miwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_miwae), np.std(RMSE_miwae)))
-print("RMSE_mean = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mean), np.std(RMSE_mean)))
-print("RMSE_miwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_miwae), np.std(RMSE_miwae)))
-print("RMSE_notmiwae selfmasking_known = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae), np.std(RMSE_notmiwae)))
-print("RMSE_notmiwae selfmasking = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae_selfmasking), np.std(RMSE_notmiwae_selfmasking)))
-print("RMSE_notmiwae linear = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae_linear), np.std(RMSE_notmiwae_linear)))
+    #     # ---- find imputation RMSE
+    #     RMSE_notmiwae_selfmasking.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
+
+
+    #     # ---------------------- #
+    #     # ---- fit not-MIWAE---- #
+    #     # ---------------------- #
+    #     notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="linear", name=name)
+
+    #     # ---- do the training
+    #     trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
+
+    #     # ---- find imputation RMSE
+    #     RMSE_notmiwae_linear.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
 
 
 
+    #     # ------------------------- #
+    #     # ---- mean imputation ---- #
+    #     # ------------------------- #
+    #     imp = SimpleImputer(missing_values=np.nan, strategy='mean')
+    #     imp.fit(Xnan)
+    #     Xrec = imp.transform(Xnan)
+    #     RMSE_mean.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
+
+
+    print("Data Set:",dataset, mechanism)
+    #print("Data Shape: ", data_shape)
+    print("Missing Block", multiple_block)
+
+    print("RMSE_miwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_miwae), np.std(RMSE_miwae)))
+    print("RMSE_mean = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mean), np.std(RMSE_mean)))
+    print("RMSE_miwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_miwae), np.std(RMSE_miwae)))
+    print("RMSE_notmiwae selfmasking_known = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae), np.std(RMSE_notmiwae)))
+    print("RMSE_notmiwae selfmasking = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae_selfmasking), np.std(RMSE_notmiwae_selfmasking)))
+    print("RMSE_notmiwae linear = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae_linear), np.std(RMSE_notmiwae_linear)))
+
+
+
+for block in multiple_blocks:
+    multiple_block = multiple_blocks[block]
+    run_one(multiple_block)
