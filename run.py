@@ -144,6 +144,7 @@ for _ in range(runs):
 
 print("Data Set:",dataset, mechanism)
 print("Data Shape: ", data_shape)
+print("Missing Block", multiple_block)
 
 print("RMSE_miwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_miwae), np.std(RMSE_miwae)))
 print("RMSE_mean = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mean), np.std(RMSE_mean)))
