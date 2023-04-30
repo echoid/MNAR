@@ -17,9 +17,6 @@ def introduce_mising(X):
     # using mean as indicator
     # ---- MNAR in D/2 dimensions
     mean = np.mean(Xnan[:, :int(D / 2)], axis=0)
-    q3 = np.quantile(Xnan[:, :int(D / 2)],0.75, axis=0)
-    q1 = np.quantile(Xnan[:, :int(D / 2)],0.25, axis=0)
-    #ix_larger_than_mean = Xnan[:, :int(D / 2)] > q3
     ix_larger_than_mean = Xnan[:, :int(D / 2)] > mean
     Xnan[:, :int(D / 2)][ix_larger_than_mean] = np.nan
 
@@ -29,33 +26,33 @@ def introduce_mising(X):
     return Xnan, Xz
 
 
-def introduce_mising_middle(X):
+# def introduce_mising_middle(X):
+#     N, D = X.shape
+#     Xnan = X.copy()
+
+#     # using mean as indicator
+#     # ---- MNAR in D/2 dimensions
+
+#     q3 = np.quantile(Xnan[:, :D],0.75, axis=0)
+#     q1 = np.quantile(Xnan[:, :D],0.25, axis=0)
+#     ix_q3 = Xnan[:, :D] > q3
+#     ix_q1 = Xnan[:, :D] < q1
+#     #ix_larger_than_mean = Xnan[:, :int(D / 2)] > mean
+#     Xnan[:, :D][ix_q3] = np.nan
+#     Xnan[:, :D][ix_q1] = np.nan
+
+#     Xz = Xnan.copy()
+#     Xz[np.isnan(Xnan)] = 0
+
+#     return Xnan, Xz
+
+
+def OT_missing(X, p, missing_mecha, opt="selfmasked", p_obs=0.2, q=None):
     N, D = X.shape
     Xnan = X.copy()
 
-    # using mean as indicator
-    # ---- MNAR in D/2 dimensions
 
-    q3 = np.quantile(Xnan[:, :D],0.75, axis=0)
-    q1 = np.quantile(Xnan[:, :D],0.25, axis=0)
-    ix_q3 = Xnan[:, :D] > q3
-    ix_q1 = Xnan[:, :D] < q1
-    #ix_larger_than_mean = Xnan[:, :int(D / 2)] > mean
-    Xnan[:, :D][ix_q3] = np.nan
-    Xnan[:, :D][ix_q1] = np.nan
-
-    Xz = Xnan.copy()
-    Xz[np.isnan(Xnan)] = 0
-
-    return Xnan, Xz
-
-
-def introduce_mising_advanced(X, p, missing_mecha):
-    N, D = X.shape
-    Xnan = X.copy()
-
-
-    X_miss_mcar = produce_NA(X, p_miss=p, mecha= missing_mecha,opt = "selfmasked")
+    X_miss_mcar = produce_NA(X, p_miss=p, mecha= missing_mecha, opt = opt, p_obs = p_obs, q=q)
 
     Xnan = X_miss_mcar['X_incomp'].numpy()
     Xz = Xnan.copy()

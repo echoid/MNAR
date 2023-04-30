@@ -205,7 +205,7 @@ def MNAR_mask_logistic(X, p, p_params =.3, exclude_inputs=True):
     inputs can also be missing.
     (ii) Variables are split into a set of intputs for a logistic model, and a set whose missing probabilities are
     determined by the logistic model. Then inputs are then masked MCAR (hence, missing values from the second set will
-    depend on masked values.
+    depend on masked values.)
     In either case, weights are random and the intercept is selected to attain the desired proportion of missing values.
 
     Parameters

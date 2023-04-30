@@ -142,8 +142,9 @@ class notMIWAE:
             # ---- mix x_o with samples of x_m
             self.l_out_mixed = self.l_out_sample * tf.expand_dims(1 - self.s_pl, axis=1) + tf.expand_dims(
                 self.x_pl * self.s_pl, axis=1)
-
+            
             self.logits_miss = self.bernoulli_decoder_miss(self.l_out_mixed)
+
 
         # ---- p(s|x)
         self.p_s_given_x = tfp.distributions.Bernoulli(logits=self.logits_miss)  # (probs=self.s + self.eps)
@@ -262,13 +263,16 @@ class notMIWAE:
     def bernoulli_decoder_miss(self, z):
 
         if self.missing_process == 'selfmasking':
+            print('selfmasking')
 
             self.W = tf.get_variable('W', shape=[1, 1, self.d])
             self.b = tf.get_variable('b', shape=[1, 1, self.d])
 
             logits = - self.W * (z - self.b)
 
+
         elif self.missing_process == 'selfmasking_known':
+            print('selfmasking_known')
 
             self.W = tf.get_variable('W', shape=[1, 1, self.d])
             self.W = tf.nn.softplus(self.W)
@@ -277,13 +281,17 @@ class notMIWAE:
             logits = - self.W * (z - self.b)
 
         elif self.missing_process == 'linear':
+            print('linear')
 
             logits = keras.layers.Dense(units=self.d, activation=None, name='y')(z)
 
+
         elif self.missing_process == 'nonlinear':
+            print('nonlinear')
 
             z = keras.layers.Dense(units=self.n_hidden, activation=tf.nn.tanh, name='y')(z)
             logits = keras.layers.Dense(units=self.d, activation=None, name='y')(z)
+
 
         else:
             print("use 'selfmasking', 'selfmasking_known', 'linear' or 'nonlinear' as 'missing_process'")

@@ -77,73 +77,73 @@ def run_one(multiple_block):
     RMSE_mean = []
 
 
-    # for _ in range(runs):
+    for _ in range(runs):
 
-    #     data_shape, Xtrain,Xval_org, dl = preprocessing(dataset)
+        data_shape, Xtrain,Xval_org, dl = preprocessing(dataset)
 
-    #     # ---- introduce missing process
-    #     Xnan, Xz = missing_by_range(Xtrain, multiple_block)
-    #     #Xnan, Xz =introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
-    #     # mask
-    #     S = np.array(~np.isnan(Xnan), dtype=np.float)
-    #     Xval, Xvalz = missing_by_range(Xtrain, multiple_block)
-    #     #Xval, Xvalz = introduce_mising_advanced(Xtrain, 0.8 , "MNAR")
+        # ---- introduce missing process
+        Xnan, Xz = missing_by_range(Xtrain, multiple_block)
+        #Xnan, Xz =introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
+        # mask
+        S = np.array(~np.isnan(Xnan), dtype=np.float)
+        Xval, Xvalz = missing_by_range(Xtrain, multiple_block)
+        #Xval, Xvalz = introduce_mising_advanced(Xtrain, 0.8 , "MNAR")
 
-    #     # ------------------- #
-    #     # ---- fit MIWAE ---- #
-    #     # ------------------- #
-    #     miwae = MIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, name=name)
+        # ------------------- #
+        # ---- fit MIWAE ---- #
+        # ------------------- #
+        miwae = MIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, name=name)
 
-    #     # ---- do the training
-    #     trainer.train(miwae, batch_size=batch_size, max_iter=max_iter, name=name + 'miwae')
+        # ---- do the training
+        trainer.train(miwae, batch_size=batch_size, max_iter=max_iter, name=name + 'miwae')
 
-    #     # ---- find imputation RMSE
-    #     RMSE_miwae.append(utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)[0])
+        # ---- find imputation RMSE
+        RMSE_miwae.append(utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)[0])
 
-    #     # ---------------------- #
-    #     # ---- fit not-MIWAE---- #
-    #     # ---------------------- #
-    #     notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="selfmasking_known", name=name)
+        # ---------------------- #
+        # ---- fit not-MIWAE---- #
+        # ---------------------- #
+        notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="selfmasking_known", name=name)
 
-    #     # ---- do the training
-    #     trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
+        # ---- do the training
+        trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
-    #     # ---- find imputation RMSE
-    #     RMSE_notmiwae.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
-
-
-    #     # ---------------------- #
-    #     # ---- fit not-MIWAE---- #
-    #     # ---------------------- #
-    #     notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="selfmasking", name=name)
-
-    #     # ---- do the training
-    #     trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
-
-    #     # ---- find imputation RMSE
-    #     RMSE_notmiwae_selfmasking.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
+        # ---- find imputation RMSE
+        RMSE_notmiwae.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
 
 
-    #     # ---------------------- #
-    #     # ---- fit not-MIWAE---- #
-    #     # ---------------------- #
-    #     notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="linear", name=name)
+        # ---------------------- #
+        # ---- fit not-MIWAE---- #
+        # ---------------------- #
+        notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="selfmasking", name=name)
 
-    #     # ---- do the training
-    #     trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
+        # ---- do the training
+        trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
-    #     # ---- find imputation RMSE
-    #     RMSE_notmiwae_linear.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
+        # ---- find imputation RMSE
+        RMSE_notmiwae_selfmasking.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
+
+
+        # ---------------------- #
+        # ---- fit not-MIWAE---- #
+        # ---------------------- #
+        notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="linear", name=name)
+
+        # ---- do the training
+        trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
+
+        # ---- find imputation RMSE
+        RMSE_notmiwae_linear.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
 
 
 
-    #     # ------------------------- #
-    #     # ---- mean imputation ---- #
-    #     # ------------------------- #
-    #     imp = SimpleImputer(missing_values=np.nan, strategy='mean')
-    #     imp.fit(Xnan)
-    #     Xrec = imp.transform(Xnan)
-    #     RMSE_mean.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
+        # ------------------------- #
+        # ---- mean imputation ---- #
+        # ------------------------- #
+        imp = SimpleImputer(missing_values=np.nan, strategy='mean')
+        imp.fit(Xnan)
+        Xrec = imp.transform(Xnan)
+        RMSE_mean.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
 
 
     print("Data Set:",dataset, mechanism)
