@@ -10,7 +10,7 @@ from MIWAE import MIWAE
 from notMIWAE import notMIWAE
 import trainer
 import utils
-from missing_util import preprocessing,introduce_mising_advanced,missing_by_range
+from missing_util import preprocessing,missing_by_range,OT_missing
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
 import json
 
@@ -55,18 +55,13 @@ runs = 3
 dataset = sys.argv[1]
 # dataset = ["banknote","concrete","white","red"]
 mechanism = sys.argv[2]
-# mechanism = ["MAR","MCAR","MNAR"]
-json_name = sys.argv[3]
-# json_name = ["q1_quantile","q2_quantile","quantile","three_block_quantile"]
+# mechanism = ["quantile" "MAR","MCAR","OTquantile","OTlogistic","OTselfmask"]
 
 
 
 
-with open('MNAR/MNAR/missing_mech/{}.json'.format(json_name)) as f:
-    multiple_blocks = json.load(f)
 
-
-def run_one(multiple_block):
+def run_one(multiple_block=None):
 
     RMSE_miwae = []
     RMSE_notmiwae = []
@@ -80,12 +75,19 @@ def run_one(multiple_block):
         data_shape, Xtrain,Xval_org, dl = preprocessing(dataset)
 
         # ---- introduce missing process
-        Xnan, Xz = missing_by_range(Xtrain, multiple_block)
-        #Xnan, Xz =introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
-        # mask
-        S = np.array(~np.isnan(Xnan), dtype=np.float)
-        Xval, Xvalz = missing_by_range(Xtrain, multiple_block)
-        #Xval, Xvalz = introduce_mising_advanced(Xtrain, 0.8 , "MNAR")
+        if mechanism == "quantile":
+            Xnan, Xz = missing_by_range(Xtrain, multiple_block)
+            
+            # mask
+            S = np.array(~np.isnan(Xnan), dtype=np.float)
+            Xval, Xvalz = missing_by_range(Xtrain, multiple_block)
+        
+        else:
+            
+            Xnan, Xz = OT_missing(Xtrain, 0.5, mechanism, p_obs=0.2, q=None)
+            S = np.array(~np.isnan(Xnan), dtype=np.float)
+            Xval, Xvalz = OT_missing(Xtrain, 0.5, mechanism, p_obs=0.2, q=None)
+        
 
         # ------------------- #
         # ---- fit MIWAE ---- #
@@ -157,6 +159,17 @@ def run_one(multiple_block):
 
 
 
-for block in multiple_blocks:
-    multiple_block = multiple_blocks[block]
-    run_one(multiple_block)
+if mechanism == "quantile":
+    json_name = sys.argv[3]
+    # json_name = ["q1_quantile","q2_quantile","quantile","three_block_quantile"]
+    with open('MNAR/MNAR/missing_mech/{}.json'.format(json_name)) as f:
+        multiple_blocks = json.load(f)
+
+
+    for block in multiple_blocks:
+        multiple_block = multiple_blocks[block]
+        run_one(multiple_block)
+
+
+else:
+    run_one()

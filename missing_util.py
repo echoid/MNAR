@@ -47,12 +47,12 @@ def introduce_mising(X):
 #     return Xnan, Xz
 
 
-def OT_missing(X, p, missing_mecha, opt="selfmasked", p_obs=0.2, q=None):
+def OT_missing(X, p, missing_mecha, p_obs=0.2, q=0.25):
     N, D = X.shape
     Xnan = X.copy()
 
 
-    X_miss_mcar = produce_NA(X, p_miss=p, mecha= missing_mecha, opt = opt, p_obs = p_obs, q=q)
+    X_miss_mcar = produce_NA(X, p_miss=p, mecha= missing_mecha, p_obs = p_obs, q=q)
 
     Xnan = X_miss_mcar['X_incomp'].numpy()
     Xz = Xnan.copy()
@@ -99,7 +99,7 @@ def read_data(url):
 
 # Function produce_NA for generating missing values ------------------------------------------------------
 
-def produce_NA(X, p_miss, mecha="MCAR", opt=None, p_obs=0.2, q=None):
+def produce_NA(X, p_miss, mecha="OTselfmask", p_obs=0.2, q=0.25):
     """
     Generate missing values for specifics missing-data mechanism and proportion of missing values. 
     
@@ -133,14 +133,23 @@ def produce_NA(X, p_miss, mecha="MCAR", opt=None, p_obs=0.2, q=None):
         X = torch.from_numpy(X)
     
     if mecha == "MAR":
+        print("MAR")
         mask = MAR_mask(X, p_miss, p_obs).double()
-    elif mecha == "MNAR" and opt == "logistic":
+
+    elif mecha == "OTlogistic":
+        print("OTlogistic")
         mask = MNAR_mask_logistic(X, p_miss, p_obs).double()
-    elif mecha == "MNAR" and opt == "quantile":
+
+    elif mecha == "OTquantile":
+        print("OTquantile")
         mask = MNAR_mask_quantiles(X, p_miss, q, 1-p_obs).double()
-    elif mecha == "MNAR" and opt == "selfmasked":
+
+    elif mecha == "OTselfmask":
+        print("OTselfmask")
         mask = MNAR_self_mask_logistic(X, p_miss).double()
+
     else:
+        print("MCAR")
         mask = (torch.rand(X.shape) < p_miss).double()
     
     X_nas = X.clone()
