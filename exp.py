@@ -140,12 +140,12 @@ for _ in range(runs):
     data_shape, Xtrain,Xval_org, dl = preprocessing("url2")
 
     # ---- introduce missing process
-    Xnan, Xz = introduce_mising_middle(Xtrain)
-    #Xnan, Xz =introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
+    #Xnan, Xz = introduce_mising_middle(Xtrain)
+    Xnan, Xz =introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
     # mask
     S = np.array(~np.isnan(Xnan), dtype=np.float)
-    Xval, Xvalz = introduce_mising_middle(Xval_org)
-    #Xval, Xvalz = introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
+    #Xval, Xvalz = introduce_mising_middle(Xval_org)
+    Xval, Xvalz = introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
 
     # ------------------- #
     # ---- fit MIWAE ---- #
@@ -213,12 +213,12 @@ for _ in range(runs):
     data_shape, Xtrain,Xval_org, dl = preprocessing("url3")
 
     # ---- introduce missing process
-    Xnan, Xz = introduce_mising_middle(Xtrain)
-    #Xnan, Xz =introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
+    #Xnan, Xz = introduce_mising_middle(Xtrain)
+    Xnan, Xz =introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
     # mask
     S = np.array(~np.isnan(Xnan), dtype=np.float)
-    Xval, Xvalz = introduce_mising_middle(Xval_org)
-    #Xval, Xvalz = introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
+    #Xval, Xvalz = introduce_mising_middle(Xval_org)
+    Xval, Xvalz = introduce_mising_advanced(Xtrain, 0.75 , "MNAR")
 
     # ------------------- #
     # ---- fit MIWAE ---- #

@@ -55,16 +55,14 @@ runs = 3
 dataset = sys.argv[1]
 # dataset = ["banknote","concrete","white","red"]
 mechanism = sys.argv[2]
-json_name = sys.argv[3]
 # mechanism = ["MAR","MCAR","MNAR"]
+json_name = sys.argv[3]
+# json_name = ["q1_quantile","q2_quantile","quantile","three_block_quantile"]
 
 
-# multiple_block = {1:{"lower": 0.5,"upper":1,"partial_missing":0.}
-#                   #,2:{"lower": 0.5,"upper":0.6,"partial_missing":0.}
-#                   #,3:{"lower": 0.8,"upper":0.9,"partial_missing":0.}
-#                   }
 
-with open('missing_mech/{}.json'.format(json_name)) as f:
+
+with open('MNAR/MNAR/missing_mech/{}.json'.format(json_name)) as f:
     multiple_blocks = json.load(f)
 
 
@@ -147,7 +145,7 @@ def run_one(multiple_block):
 
 
     print("Data Set:",dataset, mechanism)
-    #print("Data Shape: ", data_shape)
+    print("Data Shape: ", data_shape)
     print("Missing Block", multiple_block)
 
     print("RMSE_miwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_miwae), np.std(RMSE_miwae)))
