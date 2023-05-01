@@ -164,8 +164,10 @@ def preprocessing(url):
 
     data = read_data(url)
     np.random.shuffle(data)
+    label = data.copy()[:,-1]
     # ---- drop the classification attribute
     data = data[:, :-1]
+
     # ----
 
     N, D = data.shape
@@ -183,7 +185,7 @@ def preprocessing(url):
     Xtrain = data.copy()
     Xval_org = data.copy()
 
-    return data.shape, Xtrain, Xval_org, dl
+    return data.shape, Xtrain, Xval_org, dl, label
 
 
 

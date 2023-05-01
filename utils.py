@@ -1,4 +1,11 @@
 import numpy as np
+from sklearn import svm
+from sklearn import tree
+from sklearn.linear_model import SGDClassifier
+from sklearn import linear_model
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import mean_squared_error
+
 
 
 def imputationRMSE(model, Xorg, Xz, X, S, L):
@@ -77,3 +84,23 @@ def not_imputationRMSE(model, Xorg, Xz, X, S, L):
             print('{0} / {1}'.format(i, N))
 
     return np.sqrt(np.sum((Xorg - XM) ** 2 * (1 - S)) / np.sum(1 - S)), XM
+
+
+def downstream(X_train, X_imp, label, dataset):
+    train_result = []
+    imputation_result = []
+
+    if dataset == "concrete":
+        modellist = [svm.SVR(),tree.DecisionTreeRegressor(),linear_model.Lasso(alpha=0.1)]
+        for regr in modellist:
+            regr.fit(X_train, label)
+            train_result.append(mean_squared_error(label, regr.predict(X_train)))
+            regr.fit(X_imp, label)
+            imputation_result.append(mean_squared_error(label, regr.predict(X_imp)))
+    else:
+        modellist = [tree.DecisionTreeClassifier(),SGDClassifier(),svm.SVC()]
+        for clf in modellist:
+            train_result.append(cross_val_score(clf, X_train, label, cv=3, scoring='f1_macro'))
+            imputation_result.append(cross_val_score(clf, X_imp, label, cv=3, scoring='f1_macro'))
+
+    return train_result,imputation_result

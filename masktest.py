@@ -54,7 +54,8 @@ runs = 1
 
 
 
-dataset = sys.argv[1]
+#dataset = sys.argv[1]
+dataset = "banknote"
 # dataset = ["banknote","concrete","white","red"]
 #mechanism = sys.argv[2]
 #json_name = sys.argv[3]
@@ -70,14 +71,18 @@ dataset = sys.argv[1]
 
 def run_one(multiple_block=None):
 
+
+    RMSE_miwae = []
     RMSE_notmiwae = []
+    RMSE_notmiwae_selfmasking = []
+    RMSE_notmiwae_linear = []
+    RMSE_mean = []
 
 
 
     for _ in range(runs):
 
-        data_shape, Xtrain,Xval_org, dl = preprocessing(dataset)
-
+        data_shape, Xtrain,Xval_org, dl, label = preprocessing(dataset)
         # ---- introduce missing process
         Xnan, Xz = introduce_mising(Xtrain)
 
@@ -97,29 +102,42 @@ def run_one(multiple_block=None):
         # # ---- find imputation RMSE
         # RMSE_miwae.append(utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)[0])
 
-        # ---------------------- #
-        # ---- fit not-MIWAE---- #
-        # ---------------------- #
-        notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="selfmasking_known", name=name)
+        # # ---------------------- #
+        # # ---- fit not-MIWAE---- #
+        # # ---------------------- #
+        # notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="selfmasking_known", name=name)
 
-        # ---- do the training
-        trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
+        # # ---- do the training
+        # trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
-        # ---- find imputation RMSE
-        RMSE_notmiwae.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
+        # # ---- find imputation RMSE
+        # rmse, imputation = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        # RMSE_notmiwae.append(rmse)
 
+        ## RMSE_notmiwae.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
 
+        # ------------------------- #
+        # ---- mean imputation ---- #
+        # ------------------------- #
+        imp = SimpleImputer(missing_values=np.nan, strategy='mean')
+        imp.fit(Xnan)
+        Xrec = imp.transform(Xnan)
+        RMSE_mean.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
+
+        train_result, imputation_result = utils.downstream(Xtrain, Xrec, label, dataset)
 
 
 
     print("Data Set:",dataset
           #, mechanism
           )
-    #print("Data Shape: ", data_shape)
+    print("Data Shape: ", data_shape)
 
 
-    print("RMSE_notmiwae selfmasking_known = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae), np.std(RMSE_notmiwae)))
-
+    #print("RMSE_notmiwae selfmasking_known = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae), np.std(RMSE_notmiwae)))
+    print("Mean = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mean), np.std(RMSE_mean)))
+    print("Mean downstream train = {0:.5f} +- {1:.5f}".format(np.mean(train_result), np.std(train_result)))
+    print("Mean downstream test = {0:.5f} +- {1:.5f}".format(np.mean(imputation_result), np.std(imputation_result)))
 
 
 
