@@ -189,7 +189,6 @@ def preprocessing(url):
     # Yval_org = label.copy()
 
     Xtrain = data.copy()[:int(N*0.8),:]
-    
     Xval_org = data.copy()[int(N*0.8):int(N*0.9),]
     Xtest = data.copy()[int(N*0.9):,:]
 
@@ -197,7 +196,7 @@ def preprocessing(url):
     Yval_org = label.copy()[int(N*0.8):int(N*0.9)]
     Ytest = label.copy()[int(N*0.9):]
 
-    return data.shape, Xtrain, Xval_org, dl, Ytrain, Yval_org
+    return data.shape, Xtrain, Xval_org, Xtest, Ytrain, Yval_org , Ytest, dl
 
 
 

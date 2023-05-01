@@ -78,29 +78,35 @@ def run_one(multiple_block=None):
     RMSE_notmiwae_linear = []
     RMSE_mean = []
 
+    ML_mean = []
+    ML_original = []
+    ML_miwae = []
+
 
 
     for _ in range(runs):
 
-        data_shape, Xtrain,Xval_org, dl,Ytrain, Yval_org = preprocessing(dataset)
+        data_shape, Xtrain, Xval_org, Xtest, Ytrain, Yval_org , Ytest, dl = preprocessing(dataset)
         # ---- introduce missing process
         Xnan, Xz = introduce_mising(Xtrain)
-
         # mask
         S = np.array(~np.isnan(Xnan), dtype=np.float)
-        Xval, Xvalz = introduce_mising(Xtrain)
+        Xval, Xvalz = introduce_mising(Xval_org)
   
 
-        # # ------------------- #
-        # # ---- fit MIWAE ---- #
-        # # ------------------- #
-        # miwae = MIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, name=name)
+        # ------------------- #
+        # ---- fit MIWAE ---- #
+        # ------------------- #
+        miwae = MIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, name=name)
 
-        # # ---- do the training
-        # trainer.train(miwae, batch_size=batch_size, max_iter=max_iter, name=name + 'miwae')
+        # ---- do the training
+        trainer.train(miwae, batch_size=batch_size, max_iter=max_iter, name=name + 'miwae')
 
-        # # ---- find imputation RMSE
-        # RMSE_miwae.append(utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)[0])
+        # ---- find imputation RMSE
+        rmse, Ximp = utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)
+        RMSE_miwae.append(rmse)
+        #ML_miwae.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
+        ML_miwae.append(utils.downstream(Ximp, Ytrain, Ximp, Ytrain, dataset))
 
         # # ---------------------- #
         # # ---- fit not-MIWAE---- #
@@ -121,10 +127,16 @@ def run_one(multiple_block=None):
         # ------------------------- #
         imp = SimpleImputer(missing_values=np.nan, strategy='mean')
         imp.fit(Xnan)
-        Xrec = imp.transform(Xnan)
-        RMSE_mean.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
+        Ximp = imp.transform(Xnan)
+        RMSE_mean.append(np.sqrt(np.sum((Xtrain - Ximp) ** 2 * (1 - S)) / np.sum(1 - S)))
+        
+        ML_mean.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
 
-        train_result, imputation_result = utils.downstream(Xtrain, Xrec, label, dataset)
+        # ------------------------- #
+        # ----- original data ----- #
+        # ------------------------- #
+
+        ML_original.append(utils.downstream(Xtrain, Ytrain, Xtest, Ytest, dataset))
 
 
 
@@ -135,9 +147,12 @@ def run_one(multiple_block=None):
 
 
     #print("RMSE_notmiwae selfmasking_known = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae), np.std(RMSE_notmiwae)))
-    print("Mean = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mean), np.std(RMSE_mean)))
-    print("Mean downstream train = {0:.5f} +- {1:.5f}".format(np.mean(train_result), np.std(train_result)))
-    print("Mean downstream test = {0:.5f} +- {1:.5f}".format(np.mean(imputation_result), np.std(imputation_result)))
+    print("Mean RMSE = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mean), np.std(RMSE_mean)))
+    print("miwae RMSE = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_miwae), np.std(RMSE_miwae)))
+    print()
+    print("Mean downstream  = {0:.5f} +- {1:.5f}".format(np.mean(ML_mean), np.std(ML_mean)))
+    print("miwae downstream  = {0:.5f} +- {1:.5f}".format(np.mean(ML_miwae), np.std(ML_miwae)))
+    print("Original downstream  = {0:.5f} +- {1:.5f}".format(np.mean(ML_original), np.std(ML_original)))
 
 
 

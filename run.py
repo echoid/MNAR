@@ -69,16 +69,17 @@ def run_one(multiple_block=None):
     RMSE_notmiwae_linear = []
     RMSE_mean = []
 
-    downstream_miwae = []
-    downstream_notmiwae = []
-    downstream_notmiwae_selfmasking = []
-    downstream_notmiwae_linear = []
-    downstream_mean = []
+    ML_miwae = []
+    ML_notmiwae = []
+    ML_notmiwae_selfmasking = []
+    ML_notmiwae_linear = []
+    ML_mean = []
+    ML_original = []
 
 
     for _ in range(runs):
 
-        data_shape, Xtrain,Xval_org, dl,Ytrain,Yval_org = preprocessing(dataset)
+        data_shape, Xtrain, Xval_org, Xtest, Ytrain, Yval_org , Ytest, dl = preprocessing(dataset)
 
         # ---- introduce missing process
         if mechanism == "quantile":
@@ -105,11 +106,13 @@ def run_one(multiple_block=None):
 
         # ---- find imputation RMSE
         #RMSE_miwae.append(utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)[0])
-        rmse, X_imp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
-        RMSE_notmiwae.append(rmse)
+        rmse, Ximp = utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)
+        RMSE_miwae.append(rmse)
         # ---- find imputation ML util
-        
-        downstream_miwae.append(utils.downstream(X_imp, label, dataset))
+        ML_miwae.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
+
+
+
 
         # ---------------------- #
         # ---- fit not-MIWAE---- #
@@ -120,7 +123,9 @@ def run_one(multiple_block=None):
         trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
         # ---- find imputation RMSE
-        RMSE_notmiwae.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
+        rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        RMSE_notmiwae.append(rmse)
+        ML_notmiwae.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
 
 
         # ---------------------- #
@@ -132,8 +137,9 @@ def run_one(multiple_block=None):
         trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
         # ---- find imputation RMSE
-        RMSE_notmiwae_selfmasking.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
-
+        rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        RMSE_notmiwae_selfmasking.append(rmse)
+        ML_notmiwae_selfmasking.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
 
         # ---------------------- #
         # ---- fit not-MIWAE---- #
@@ -144,7 +150,9 @@ def run_one(multiple_block=None):
         trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
         # ---- find imputation RMSE
-        RMSE_notmiwae_linear.append(utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)[0])
+        rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        RMSE_notmiwae_linear.append(rmse)
+        ML_notmiwae_linear.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
 
 
 
@@ -154,20 +162,37 @@ def run_one(multiple_block=None):
         # ------------------------- #
         imp = SimpleImputer(missing_values=np.nan, strategy='mean')
         imp.fit(Xnan)
-        Xrec = imp.transform(Xnan)
-        RMSE_mean.append(np.sqrt(np.sum((Xtrain - Xrec) ** 2 * (1 - S)) / np.sum(1 - S)))
+        Ximp = imp.transform(Xnan)
+        RMSE_mean.append(np.sqrt(np.sum((Xtrain - Ximp) ** 2 * (1 - S)) / np.sum(1 - S)))
+        
+        ML_mean.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
+
+        # ------------------------- #
+        # ----- original data ----- #
+        # ------------------------- #
+
+        ML_original.append(utils.downstream(Xtrain, Ytrain, Xtest, Ytest, dataset))
 
 
     print("Data Set:",dataset, mechanism)
     print("Data Shape: ", data_shape)
-    #print("Missing Block", multiple_block)
+    if mechanism == "quantile":
+        print("Missing Block", multiple_block)
 
     print("RMSE_mean = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mean), np.std(RMSE_mean)))
     print("RMSE_miwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_miwae), np.std(RMSE_miwae)))
     print("RMSE_notmiwae selfmasking_known = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae), np.std(RMSE_notmiwae)))
     print("RMSE_notmiwae selfmasking = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae_selfmasking), np.std(RMSE_notmiwae_selfmasking)))
-    print("RMSE_notmiwae linear = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae_linear), np.std(RMSE_notmiwae_linear)))
+    print("RMSE_notmiwae linear = {0:.5f} +- {1:.5f}\n\n".format(np.mean(RMSE_notmiwae_linear), np.std(RMSE_notmiwae_linear)))
 
+
+
+    print("ML_original = {0:.5f} +- {1:.5f}".format(np.mean(ML_original), np.std(ML_original)))
+    print("ML_mean = {0:.5f} +- {1:.5f}".format(np.mean(ML_mean), np.std(ML_mean)))
+    print("ML_miwae = {0:.5f} +- {1:.5f}".format(np.mean(ML_miwae), np.std(ML_miwae)))
+    print("ML_notmiwae selfmasking_known = {0:.5f} +- {1:.5f}".format(np.mean(ML_notmiwae), np.std(ML_notmiwae)))
+    print("ML_notmiwae selfmasking = {0:.5f} +- {1:.5f}".format(np.mean(ML_notmiwae_selfmasking), np.std(ML_notmiwae_selfmasking)))
+    print("ML_notmiwae linear = {0:.5f} +- {1:.5f}".format(np.mean(ML_notmiwae_linear), np.std(ML_notmiwae_linear)))
 
 
 if mechanism == "quantile":

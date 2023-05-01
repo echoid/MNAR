@@ -3,8 +3,7 @@ from sklearn import svm
 from sklearn import tree
 from sklearn.linear_model import SGDClassifier
 from sklearn import linear_model
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import mean_squared_error
+from sklearn.metrics import mean_squared_error,f1_score
 
 
 
@@ -86,17 +85,18 @@ def not_imputationRMSE(model, Xorg, Xz, X, S, L):
     return np.sqrt(np.sum((Xorg - XM) ** 2 * (1 - S)) / np.sum(1 - S)), XM
 
 
-def downstream(X, y, dataset):
+def downstream(Xtrain, Ytrain, Xtest,Ytest, dataset):
     result = []
 
     if dataset == "concrete":
         modellist = [svm.SVR(),tree.DecisionTreeRegressor(),linear_model.Lasso(alpha=0.1)]
         for regr in modellist:
-            regr.fit(X, y)
-            result.append(mean_squared_error(label, regr.predict(X_train)))
+            regr.fit(Xtrain, Ytrain)
+            result.append(mean_squared_error(Ytest, regr.predict(Xtest)))
     else:
         modellist = [tree.DecisionTreeClassifier(),SGDClassifier(),svm.SVC()]
         for clf in modellist:
-            result.append(cross_val_score(clf, X, y, cv=3, scoring='f1_macro'))
+            clf.fit(Xtrain, Ytrain)
+            result.append(f1_score(Ytest, clf.predict(Xtest), average='weighted'))
 
     return result
