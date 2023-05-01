@@ -82,7 +82,7 @@ def run_one(multiple_block=None):
 
     for _ in range(runs):
 
-        data_shape, Xtrain,Xval_org, dl, label = preprocessing(dataset)
+        data_shape, Xtrain,Xval_org, dl,Ytrain, Yval_org = preprocessing(dataset)
         # ---- introduce missing process
         Xnan, Xz = introduce_mising(Xtrain)
 

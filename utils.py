@@ -86,21 +86,17 @@ def not_imputationRMSE(model, Xorg, Xz, X, S, L):
     return np.sqrt(np.sum((Xorg - XM) ** 2 * (1 - S)) / np.sum(1 - S)), XM
 
 
-def downstream(X_train, X_imp, label, dataset):
-    train_result = []
-    imputation_result = []
+def downstream(X, y, dataset):
+    result = []
 
     if dataset == "concrete":
         modellist = [svm.SVR(),tree.DecisionTreeRegressor(),linear_model.Lasso(alpha=0.1)]
         for regr in modellist:
-            regr.fit(X_train, label)
-            train_result.append(mean_squared_error(label, regr.predict(X_train)))
-            regr.fit(X_imp, label)
-            imputation_result.append(mean_squared_error(label, regr.predict(X_imp)))
+            regr.fit(X, y)
+            result.append(mean_squared_error(label, regr.predict(X_train)))
     else:
         modellist = [tree.DecisionTreeClassifier(),SGDClassifier(),svm.SVC()]
         for clf in modellist:
-            train_result.append(cross_val_score(clf, X_train, label, cv=3, scoring='f1_macro'))
-            imputation_result.append(cross_val_score(clf, X_imp, label, cv=3, scoring='f1_macro'))
+            result.append(cross_val_score(clf, X, y, cv=3, scoring='f1_macro'))
 
-    return train_result,imputation_result
+    return result

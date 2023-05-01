@@ -181,11 +181,19 @@ def preprocessing(url):
     # ---- random permutation
     p = np.random.permutation(N)
     data = data[p, :]
+    label = label[p]
 
-    Xtrain = data.copy()
-    Xval_org = data.copy()
+    # Xtrain = data.copy()
+    # Xval_org = data.copy()
+    # Ytrain = label.copy()
+    # Yval_org = label.copy()
 
-    return data.shape, Xtrain, Xval_org, dl, label
+    Xtrain = data.copy()[:int(N*0.8),:]
+    Xval_org = data.copy()[int(N*0.8):,:]
+    Ytrain = label.copy()[:int(N*0.8):]
+    Yval_org = label.copy()[int(N*0.8):]
+
+    return data.shape, Xtrain, Xval_org, dl, Ytrain,Yval_org
 
 
 

@@ -69,10 +69,16 @@ def run_one(multiple_block=None):
     RMSE_notmiwae_linear = []
     RMSE_mean = []
 
+    downstream_miwae = []
+    downstream_notmiwae = []
+    downstream_notmiwae_selfmasking = []
+    downstream_notmiwae_linear = []
+    downstream_mean = []
+
 
     for _ in range(runs):
 
-        data_shape, Xtrain,Xval_org, dl = preprocessing(dataset)
+        data_shape, Xtrain,Xval_org, dl,Ytrain,Yval_org = preprocessing(dataset)
 
         # ---- introduce missing process
         if mechanism == "quantile":
@@ -80,13 +86,13 @@ def run_one(multiple_block=None):
             
             # mask
             S = np.array(~np.isnan(Xnan), dtype=np.float)
-            Xval, Xvalz = missing_by_range(Xtrain, multiple_block)
+            Xval, Xvalz = missing_by_range(Xval_org, multiple_block)
         
         else:
             
-            Xnan, Xz = OT_missing(Xtrain, 0.5, mechanism, p_obs=0.2, q=None)
+            Xnan, Xz = OT_missing(Xtrain, 0.5, mechanism, p_obs=0.2, q=0.2)
             S = np.array(~np.isnan(Xnan), dtype=np.float)
-            Xval, Xvalz = OT_missing(Xtrain, 0.5, mechanism, p_obs=0.2, q=None)
+            Xval, Xvalz = OT_missing(Xval_org, 0.5, mechanism, p_obs=0.2, q=0.2)
         
 
         # ------------------- #
@@ -98,7 +104,12 @@ def run_one(multiple_block=None):
         trainer.train(miwae, batch_size=batch_size, max_iter=max_iter, name=name + 'miwae')
 
         # ---- find imputation RMSE
-        RMSE_miwae.append(utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)[0])
+        #RMSE_miwae.append(utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)[0])
+        rmse, X_imp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        RMSE_notmiwae.append(rmse)
+        # ---- find imputation ML util
+        
+        downstream_miwae.append(utils.downstream(X_imp, label, dataset))
 
         # ---------------------- #
         # ---- fit not-MIWAE---- #
@@ -137,6 +148,7 @@ def run_one(multiple_block=None):
 
 
 
+
         # ------------------------- #
         # ---- mean imputation ---- #
         # ------------------------- #
@@ -148,9 +160,8 @@ def run_one(multiple_block=None):
 
     print("Data Set:",dataset, mechanism)
     print("Data Shape: ", data_shape)
-    print("Missing Block", multiple_block)
+    #print("Missing Block", multiple_block)
 
-    print("RMSE_miwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_miwae), np.std(RMSE_miwae)))
     print("RMSE_mean = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mean), np.std(RMSE_mean)))
     print("RMSE_miwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_miwae), np.std(RMSE_miwae)))
     print("RMSE_notmiwae selfmasking_known = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae), np.std(RMSE_notmiwae)))
