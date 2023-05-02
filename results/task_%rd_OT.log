@@ -1,0 +1,54 @@
+2023-04-30 17:14:34.103356: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-04-30 17:15:01.284523: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer.so.7'; dlerror: libnvinfer.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /opt/python/3.9/anaconda/lib
+2023-04-30 17:15:01.285314: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer_plugin.so.7'; dlerror: libnvinfer_plugin.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /opt/python/3.9/anaconda/lib
+2023-04-30 17:15:01.285332: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Cannot dlopen some TensorRT libraries. If you would like to use Nvidia GPU with TensorRT, please make sure the missing libraries mentioned above are installed properly.
+WARNING:tensorflow:From /home/s223039521/.local/lib/python3.9/site-packages/tensorflow/python/compat/v2_compat.py:107: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+Instructions for updating:
+non-resource variables are not supported in the long term
+Traceback (most recent call last):
+  File "/home/s223039521/MNAR/MNAR/run.py", line 13, in <module>
+    from missing_util import preprocessing,missing_by_range,OT_missing
+  File "/home/s223039521/MNAR/MNAR/missing_util.py", line 10, in <module>
+    from utils_generation import *
+  File "/home/s223039521/MNAR/MNAR/utils_generation.py", line 4, in <module>
+    import torch
+  File "/opt/python/3.9/pytorch/1.10.1_py3.9/lib/python3.9/site-packages/torch/__init__.py", line 197, in <module>
+    from torch._C import *  # noqa: F403
+ImportError: /opt/python/3.9/pytorch/1.10.1_py3.9/lib/python3.9/site-packages/torch/lib/libtorch_cuda_cpp.so: undefined symbol: cudaGraphRetainUserObject, version libcudart.so.11.0
+2023-04-30 17:15:46.519378: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-04-30 17:16:05.067215: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer.so.7'; dlerror: libnvinfer.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /opt/python/3.9/anaconda/lib
+2023-04-30 17:16:05.067328: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer_plugin.so.7'; dlerror: libnvinfer_plugin.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /opt/python/3.9/anaconda/lib
+2023-04-30 17:16:05.067342: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Cannot dlopen some TensorRT libraries. If you would like to use Nvidia GPU with TensorRT, please make sure the missing libraries mentioned above are installed properly.
+WARNING:tensorflow:From /home/s223039521/.local/lib/python3.9/site-packages/tensorflow/python/compat/v2_compat.py:107: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+Instructions for updating:
+non-resource variables are not supported in the long term
+Traceback (most recent call last):
+  File "/home/s223039521/MNAR/MNAR/run.py", line 13, in <module>
+    from missing_util import preprocessing,missing_by_range,OT_missing
+  File "/home/s223039521/MNAR/MNAR/missing_util.py", line 10, in <module>
+    from utils_generation import *
+  File "/home/s223039521/MNAR/MNAR/utils_generation.py", line 4, in <module>
+    import torch
+  File "/opt/python/3.9/pytorch/1.10.1_py3.9/lib/python3.9/site-packages/torch/__init__.py", line 197, in <module>
+    from torch._C import *  # noqa: F403
+ImportError: /opt/python/3.9/pytorch/1.10.1_py3.9/lib/python3.9/site-packages/torch/lib/libtorch_cuda_cpp.so: undefined symbol: cudaGraphRetainUserObject, version libcudart.so.11.0
+2023-04-30 17:16:41.985914: I tensorflow/core/platform/cpu_feature_guard.cc:193] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN) to use the following CPU instructions in performance-critical operations:  AVX2 FMA
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-04-30 17:17:02.775779: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer.so.7'; dlerror: libnvinfer.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /opt/python/3.9/anaconda/lib
+2023-04-30 17:17:02.775889: W tensorflow/compiler/xla/stream_executor/platform/default/dso_loader.cc:64] Could not load dynamic library 'libnvinfer_plugin.so.7'; dlerror: libnvinfer_plugin.so.7: cannot open shared object file: No such file or directory; LD_LIBRARY_PATH: /opt/python/3.9/anaconda/lib
+2023-04-30 17:17:02.775903: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Cannot dlopen some TensorRT libraries. If you would like to use Nvidia GPU with TensorRT, please make sure the missing libraries mentioned above are installed properly.
+WARNING:tensorflow:From /home/s223039521/.local/lib/python3.9/site-packages/tensorflow/python/compat/v2_compat.py:107: disable_resource_variables (from tensorflow.python.ops.variable_scope) is deprecated and will be removed in a future version.
+Instructions for updating:
+non-resource variables are not supported in the long term
+Traceback (most recent call last):
+  File "/home/s223039521/MNAR/MNAR/run.py", line 13, in <module>
+    from missing_util import preprocessing,missing_by_range,OT_missing
+  File "/home/s223039521/MNAR/MNAR/missing_util.py", line 10, in <module>
+    from utils_generation import *
+  File "/home/s223039521/MNAR/MNAR/utils_generation.py", line 4, in <module>
+    import torch
+  File "/opt/python/3.9/pytorch/1.10.1_py3.9/lib/python3.9/site-packages/torch/__init__.py", line 197, in <module>
+    from torch._C import *  # noqa: F403
+ImportError: /opt/python/3.9/pytorch/1.10.1_py3.9/lib/python3.9/site-packages/torch/lib/libtorch_cuda_cpp.so: undefined symbol: cudaGraphRetainUserObject, version libcudart.so.11.0
