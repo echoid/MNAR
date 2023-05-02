@@ -7,8 +7,8 @@ import matplotlib.pyplot as plt
 #import wget
 #wget.download('https://raw.githubusercontent.com/BorisMuzellec/MissingDataOT/master/utils.py')
 
-from utils_generation import *
-import torch
+# from utils_generation import *
+# import torch
 
 def introduce_mising(X):
     N, D = X.shape
@@ -196,7 +196,7 @@ def preprocessing(url):
     Yval_org = label.copy()[int(N*0.8):int(N*0.9)]
     Ytest = label.copy()[int(N*0.9):]
 
-    return data.shape, Xtrain, Xval_org, Xtest,  dl, Ytrain, Yval_org, Ytest
+    return data.shape, Xtrain, Xval_org, Xtest, Ytrain, Yval_org, Ytest,dl
 
 
 

@@ -81,14 +81,6 @@ def run_one(multiple_block=None):
 
         data_shape, Xtrain, Xval_org, Xtest, Ytrain, Yval_org , Ytest, dl = preprocessing(dataset)
 
-        print("Xtrain shape", Xtrain.shape)
-        print("Xval_org",Xval_org.shape)
-        print("Xtest shape", Xtrain.shape)
-
-        print("Ytrain shape", Ytrain.shape)
-        print("Yval_org",Yval_org.shape)
-        print("Ytest shape", Ytest.shape)
-
 
 
         # ---- introduce missing process
