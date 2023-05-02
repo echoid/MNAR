@@ -81,13 +81,24 @@ def run_one(multiple_block=None):
 
         data_shape, Xtrain, Xval_org, Xtest, Ytrain, Yval_org , Ytest, dl = preprocessing(dataset)
 
+        print("Xtrain shape", Xtrain.shape)
+        print("Xval_org",Xval_org.shape)
+        print("Xtest shape", Xtrain.shape)
+
+        print("Ytrain shape", Ytrain.shape)
+        print("Yval_org",Yval_org.shape)
+        print("Ytest shape", Ytest.shape)
+
+
+
         # ---- introduce missing process
         if mechanism == "quantile":
             Xnan, Xz = missing_by_range(Xtrain, multiple_block)
             
             # mask
             S = np.array(~np.isnan(Xnan), dtype=np.float)
-            Xval, Xvalz = missing_by_range(Xval_org, multiple_block)
+            #Xval, Xvalz = missing_by_range(Xval_org, multiple_block)
+            Xval, Xvalz = missing_by_range(Xtrain, multiple_block)
         
         else:
             
@@ -197,7 +208,7 @@ def run_one(multiple_block=None):
 
 if mechanism == "quantile":
     json_name = sys.argv[3]
-    # json_name = ["q1_quantile","q2_quantile","quantile","three_block_quantile"]
+    # json_name = ["q1_quantile","q2_quantile","quantile","three_block_quantile", "complete"]
     with open('MNAR/MNAR/missing_mech/{}.json'.format(json_name)) as f:
         multiple_blocks = json.load(f)
 
