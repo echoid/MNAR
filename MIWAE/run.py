@@ -28,6 +28,7 @@ name = '/tmp/uci/task01/best'
 n_hidden = 128
 n_samples = 20
 max_iter = 100000
+max_iter = 1
 batch_size = 16
 L = 10000
 

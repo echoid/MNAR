@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from sklearn.datasets import load_iris, load_wine, fetch_california_housing
-
+from sklearn.preprocessing import scale
 import os
 import pandas as pd
 
@@ -16,13 +16,15 @@ import wget
 
 DATASETS = ['iris', 'wine', 
             #'boston',
-             'california', 'parkinsons', \
+             'california',
+             #  'parkinsons', \
             'climate_model_crashes', 'concrete_compression', \
             'yacht_hydrodynamics', 'airfoil_self_noise', \
             'connectionist_bench_sonar', 'ionosphere', 'qsar_biodegradation', \
             'seeds', 'glass', 'ecoli', 'yeast', 'libras', 'planning_relax', \
             'blood_transfusion', 'breast_cancer_diagnostic', \
-            'connectionist_bench_vowel', 'concrete_slump', \
+            'connectionist_bench_vowel',
+             # 'concrete_slump', \
             'wine_quality_red', 'wine_quality_white']
 
 
@@ -91,8 +93,12 @@ def dataset_loader(dataset):
         #     X = load_boston()['data']
         elif dataset == 'california':
             data = fetch_california_housing()
-        elif dataset == 'parkinsons':
-            data = fetch_parkinsons()
+            try:
+                os.mkdir('datasets/california')
+            except:
+                pass
+        # elif dataset == 'parkinsons':
+        #     data = fetch_parkinsons()
         elif dataset == 'climate_model_crashes':
             data = fetch_climate_model_crashes()
         elif dataset == 'concrete_compression':
@@ -125,31 +131,31 @@ def dataset_loader(dataset):
             data = fetch_breast_cancer_diagnostic()
         elif dataset == 'connectionist_bench_vowel':
             data = fetch_connectionist_bench_vowel()
-        elif dataset == 'concrete_slump':
-            data = fetch_concrete_slump()
+        # elif dataset == 'concrete_slump':
+        #     data = fetch_concrete_slump()
         elif dataset == 'wine_quality_red':
             data = fetch_wine_quality_red()
         elif dataset == 'wine_quality_white':
             data = fetch_wine_quality_white()
-        print(dataset,data["data"].shape,len(np.unique(data["target"])))
+        #print(dataset,data["data"].shape,len(np.unique(data["target"])))
         return data
 
 
 
 
-def fetch_parkinsons():
-    if not os.path.isdir('datasets/parkinsons'):
-        os.mkdir('datasets/parkinsons')
-        url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/parkinsons/parkinsons.data'
-        wget.download(url, out='datasets/parkinsons/')
+# def fetch_parkinsons():
+#     if not os.path.isdir('datasets/parkinsons'):
+#         os.mkdir('datasets/parkinsons')
+#         url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/parkinsons/parkinsons.data'
+#         wget.download(url, out='datasets/parkinsons/')
 
-    with open('datasets/parkinsons/parkinsons.data', 'rb') as f:
-        df = pd.read_csv(f, delimiter=',', header = 0)
-        Xy = {}
-        Xy['data'] = df.values[:, 1:].astype('float')
-        Xy['target'] =  df.values[:, 0]
+#     with open('datasets/parkinsons/parkinsons.data', 'rb') as f:
+#         df = pd.read_csv(f, delimiter=',', header = 0)
+#         Xy = {}
+#         Xy['data'] = df.values[:, 1:].astype('float')
+#         Xy['target'] =  df.values[:, 0]
 
-    return Xy
+#     return Xy
 
 
 def fetch_climate_model_crashes():
@@ -161,6 +167,7 @@ def fetch_climate_model_crashes():
     with open('datasets/climate_model_crashes/pop_failures.dat', 'rb') as f:
         df = pd.read_csv(f, delimiter='\s+', header = 0)
         Xy = {}
+        # Ignore the two blocking factor
         Xy['data'] = df.values[:, 2:-1]
         Xy['target'] =  df.values[:, -1]
 
@@ -280,6 +287,7 @@ def fetch_glass():
     with open('datasets/glass/glass.data', 'rb') as f:
         df = pd.read_csv(f, delimiter=',', header = None)
         Xy = {}
+        # remove index
         Xy['data'] = df.values[:, 1:-1].astype('float')
         Xy['target'] =  df.values[:, -1]
 
@@ -295,6 +303,7 @@ def fetch_ecoli():
     with open('datasets/ecoli/ecoli.data', 'rb') as f:
         df = pd.read_csv(f, delimiter='\s+', header = None)
         Xy = {}
+        # remove index
         Xy['data'] = df.values[:, 1:-1].astype('float')
         Xy['target'] =  df.values[:, -1]
 
@@ -309,6 +318,7 @@ def fetch_yeast():
     with open('datasets/yeast/yeast.data', 'rb') as f:
         df = pd.read_csv(f, delimiter='\s+', header = None)
         Xy = {}
+        # remove index
         Xy['data'] = df.values[:, 1:-1].astype('float')
         Xy['target'] =  df.values[:, -1]
 
@@ -388,19 +398,19 @@ def fetch_connectionist_bench_vowel():
     return Xy
 
 
-def fetch_concrete_slump():
-    if not os.path.isdir('datasets/concrete_slump'):
-        os.mkdir('datasets/concrete_slump')
-        url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/concrete/slump/slump_test.data'
-        wget.download(url, out='datasets/concrete_slump/')
+# def fetch_concrete_slump():
+#     if not os.path.isdir('datasets/concrete_slump'):
+#         os.mkdir('datasets/concrete_slump')
+#         url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/concrete/slump/slump_test.data'
+#         wget.download(url, out='datasets/concrete_slump/')
 
-    with open('datasets/concrete_slump/slump_test.data', 'rb') as f:
-        df = pd.read_csv(f, delimiter=',')
-        Xy = {}
-        Xy['data'] = df.values[:, 1:-3].astype('float')
-        Xy['target'] =  df.values[:, -3:]
+#     with open('datasets/concrete_slump/slump_test.data', 'rb') as f:
+#         df = pd.read_csv(f, delimiter=',')
+#         Xy = {}
+#         Xy['data'] = df.values[:, 1:-3].astype('float')
+#         Xy['target'] =  df.values[:, -3:]
 
-    return Xy
+#     return Xy
 
 
 def fetch_wine_quality_red():
@@ -431,3 +441,81 @@ def fetch_wine_quality_white():
         Xy['target'] =  df.values[:, -1]
 
     return Xy
+
+
+def normal_split(data):
+    # ---- load data
+
+    y = data["target"]
+    # ---- drop the classification attribute
+    X = scale(data["data"]).astype(np.float32)
+
+    # ----
+
+    N, D = X.shape
+
+    dl = D - 1
+
+    # # ---- standardize data
+    # X = X - np.mean(X, axis=0)
+    # X = X / np.std(X, axis=0)
+
+
+    # ---- random permutation
+    p = np.random.permutation(N)
+    X = X[p, :]
+    y = y[p]
+
+    # Xtrain = data.copy()
+    # Xval_org = data.copy()
+    # Ytrain = label.copy()
+    # Yval_org = label.copy()
+
+    # Xtrain = X.copy()[:int(N*0.8),:]
+    # Xval_org = X.copy()[int(N*0.8):int(N*0.9),:]
+    # Xtest = X.copy()[int(N*0.9):,:]
+
+    # Ytrain = y.copy()[:int(N*0.8)]
+    # Yval_org = y.copy()[int(N*0.8):int(N*0.9)]
+    # Ytest = y.copy()[int(N*0.9):]
+
+
+    train_X = X.copy()[:int(N*0.8),:]
+    #dex_X = X.copy()[int(N*0.8):int(N*0.9),:]
+    test_X = X.copy()[int(N*0.8):,:]
+
+    train_y = y.copy()[:int(N*0.8)]
+    #dex_y = y.copy()[int(N*0.8):int(N*0.9)]
+    test_y = y.copy()[int(N*0.8):]
+
+    data = {}
+    data["train_X"] = train_X
+    data["test_X"] = test_X
+    data["train_y"] = train_y
+    data["test_y"] = test_y
+    # data["dex_X"] = dex_X
+    # data["dex_y"] = dex_y
+
+    return data,X #, Xval_org, Yval_org, 
+
+
+
+# dataname = ["connectionist_bench_sonar","qsar_biodegradation","wine_quality_white","yeast",
+#             "california","concrete_compression","yacht_hydrodynamics","airfoil_self_noise"]
+# #print(len(data_loaders.DATASETS))
+
+# for name in dataname:
+#     data = dataset_loader(name) 
+#     np.save("datasets/{}/origin_X.npy".format(name), data["data"])
+#     np.save("datasets/{}/origin_y.npy".format(name), data["target"])
+
+
+def save(name,data,data_split):
+    np.save("datasets/{}/origin_X.npy".format(name), data["data"])
+    np.save("datasets/{}/origin_y.npy".format(name), data["target"])
+    # np.save("datasets/{}/train_X.npy".format(name), data_split["train_X"])
+    # np.save("datasets/{}/train_y.npy".format(name), data_split["train_y"])
+    # # np.save("datasets/{}/val_X.npy".format(name), data_split["dex_X"])
+    # # np.save("datasets/{}/val_y.npy".format(name), data_split["dex_y"])
+    # np.save("datasets/{}/test_X.npy".format(name), data_split["test_X"])
+    # np.save("datasets/{}/test_y.npy".format(name), data_split["test_y"])
