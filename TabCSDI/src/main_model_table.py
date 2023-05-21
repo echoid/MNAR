@@ -35,13 +35,9 @@ class CSDI_base(nn.Module):
         # parameters for diffusion models
         self.num_steps = config_diff["num_steps"]
         if config_diff["schedule"] == "quad":
-            self.beta = (
-                np.linspace(
-                    config_diff["beta_start"] ** 0.5,
-                    config_diff["beta_end"] ** 0.5,
-                    self.num_steps,
-                )
-                ** 2
+            self.beta = (np.linspace(
+                config_diff["beta_start"] ** 0.5,config_diff["beta_end"] ** 0.5,self.num_steps,
+                )** 2
             )
         elif config_diff["schedule"] == "linear":
             self.beta = np.linspace(
