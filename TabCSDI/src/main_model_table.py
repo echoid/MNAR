@@ -74,6 +74,8 @@ class CSDI_base(nn.Module):
 
     def get_side_info(self, observed_tp, cond_mask):
         B, K, L = cond_mask.shape
+        # print("\nB,K,L:",B, K, L)
+        # exit()
 
         time_embed = self.time_embedding(observed_tp, self.emb_time_dim)  # (B,L,emb)
         time_embed = time_embed.unsqueeze(2).expand(-1, -1, K, -1)

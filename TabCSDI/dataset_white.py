@@ -1,28 +1,56 @@
+import sys
+sys.path.append("..")
 import pickle
 import yaml
 import os
 import re
+import sys
 import numpy as np
 import pandas as pd
 from torch.utils.data import DataLoader, Dataset
+from data_loaders import *
+from missing_mech_test.missing_method import *
 
 
-def process_func(path: str, aug_rate=1, missing_ratio=0.1):
-    data = pd.read_csv(path, header=None).iloc[:, 1:]
-    data.replace("?", np.nan, inplace=True)
-    data_aug = pd.concat([data] * aug_rate)
 
-    observed_values = data_aug.values.astype("float32")
-    observed_masks = ~np.isnan(observed_values)
-
-    masks = observed_masks.copy()
-    # for each column, mask {missing_ratio} % of observed values.
+def apply_missing(observed_values,missing_ratio,masks):
     for col in range(observed_values.shape[1]):  # col #
-        obs_indices = np.where(masks[:, col])[0]
+
+        obs_indices = np.where(observed_values[:, col])[0]
         miss_indices = np.random.choice(
-            obs_indices, (int)(len(obs_indices) * missing_ratio), replace=False
+        obs_indices, (int)(len(obs_indices) * missing_ratio), replace=False
         )
         masks[miss_indices, col] = False
+
+    return masks
+
+def process_func(path: str, aug_rate=1, missing_ratio=0.1):
+ 
+    data = dataset_loader("wine_quality_white")
+    # print(data)
+    # data.replace("?", np.nan, inplace=True)
+    # Don't apply data argument (use n*dataset)
+    # data_aug = pd.concat([data] * aug_rate)
+
+
+    observed_values = data["data"].astype("float32")
+    
+
+    observed_masks = ~np.isnan(observed_values)
+    masks = observed_masks.copy()
+    # # for each column, mask {missing_ratio} % of observed values.
+    # for col in range(observed_values.shape[1]):  # col #
+    #     obs_indices = np.where(masks[:, col])[0]
+
+    #     miss_indices = np.random.choice(
+    #         obs_indices, (int)(len(obs_indices) * missing_ratio), replace=False
+    #     )
+    #     masks[miss_indices, col] = False
+    
+    "Need input origin dataset and parameters"
+    masks = apply_missing(observed_values,missing_ratio,masks)
+
+
     # gt_mask: 0 for missing elements and manully maksed elements
     gt_masks = masks.reshape(observed_masks.shape)
 
@@ -36,24 +64,23 @@ def process_func(path: str, aug_rate=1, missing_ratio=0.1):
 class tabular_dataset(Dataset):
     # eval_length should be equal to attributes number.
     def __init__(
-        self, eval_length=10, use_index_list=None, aug_rate=1, missing_ratio=0.1, seed=0
+        self, eval_length=11, use_index_list=None, aug_rate=1, missing_ratio=0.1, seed=0
     ):
         self.eval_length = eval_length
         np.random.seed(seed)
-
-        dataset_path = "./data_breast/breast-cancer-wisconsin.data"
+        
+        dataset_path = "datasets/wine_quality_white/data.csv"
         processed_data_path = (
-            f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}.pk"
+            f"datasets/wine_quality_white/missing_ratio-{missing_ratio}_seed-{seed}.pk"
         )
         processed_data_path_norm = (
-            f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
+            f"datasets/wine_quality_white/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
         )
-
+        # If no dataset created
         if not os.path.isfile(processed_data_path):
             self.observed_values, self.observed_masks, self.gt_masks = process_func(
                 dataset_path, aug_rate=aug_rate, missing_ratio=missing_ratio
             )
-
             with open(processed_data_path, "wb") as f:
                 pickle.dump(
                     [self.observed_values, self.observed_masks, self.gt_masks], f
@@ -66,7 +93,7 @@ class tabular_dataset(Dataset):
                     f
                 )
             print("--------Normalized dataset loaded--------")
-
+        
         if use_index_list is None:
             self.use_index_list = np.arange(len(self.observed_values))
         else:
@@ -87,9 +114,11 @@ class tabular_dataset(Dataset):
 
 
 def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
+
     dataset = tabular_dataset(missing_ratio=missing_ratio, seed=seed)
     print(f"Dataset size:{len(dataset)} entries")
-
+    
+    
     indlist = np.arange(len(dataset))
 
     np.random.seed(seed + 1)
@@ -97,20 +126,25 @@ def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
 
     tmp_ratio = 1 / nfold
     start = (int)((nfold - 1) * len(dataset) * tmp_ratio)
+    
     end = (int)(nfold * len(dataset) * tmp_ratio)
 
     test_index = indlist[start:end]
     remain_index = np.delete(indlist, np.arange(start, end))
 
     np.random.shuffle(remain_index)
+
+    # Modify here to change train,valid ratio
     num_train = (int)(len(remain_index) * 1)
     train_index = remain_index[:num_train]
     valid_index = remain_index[num_train:]
 
+
+
     # Here we perform max-min normalization.
     print("Here we perform max-min normalization.")
     processed_data_path_norm = (
-        f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
+        f"datasets/wine_quality_white/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
     )
     if not os.path.isfile(processed_data_path_norm):
         print(
@@ -144,7 +178,6 @@ def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
         use_index_list=train_index, missing_ratio=missing_ratio, seed=seed
     )
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=1)
-
     valid_dataset = tabular_dataset(
         use_index_list=valid_index, missing_ratio=missing_ratio, seed=seed
     )

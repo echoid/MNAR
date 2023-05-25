@@ -2,25 +2,26 @@
 #type: args
 
 train:
-  #epochs: 500
-  epochs: 1
-  batch_size: 8
+  epochs: 250
+  batch_size: 64 
   lr: 0.0005
 
 diffusion:
-  layers: 4  
-  channels: 64 
-  nheads: 2 #4
+  layers: 4 
+  channels: 128
+  nheads: 4 
   diffusion_embedding_dim: 128
   beta_start: 0.0001
   beta_end: 0.5
-  num_steps: 150
+  num_steps: 100
   schedule: "quad"
-  mixed: False
-
+  mixed: True
+  token_emb_dim: 8
+ 
 model:
   is_unconditional: 0
-  timeemb: 32
-  featureemb: 16
+  timeemb: 128
+  featureemb: 8
   target_strategy: "random"
-  mixed: False
+  mixed: True
+  token_emb_dim: 8

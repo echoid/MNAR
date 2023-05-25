@@ -11,7 +11,8 @@ import numpy as np
 import wget
 
 
-
+import sys
+sys.path.append("..")
 
 
 DATASETS = ['iris', 'wine', 
@@ -83,6 +84,8 @@ def dataset_loader(dataset):
         Data values (predictive values only).
     """
     assert dataset in DATASETS , f"Dataset not supported: {dataset}"
+    if not "datasets" in os.listdir():
+        os.chdir("../")
 
     if dataset in DATASETS:
         if dataset == 'iris':
@@ -427,14 +430,13 @@ def fetch_wine_quality_red():
 
     return Xy
 
-
+# Dpne!
 def fetch_wine_quality_white():
     if not os.path.isdir('datasets/wine_quality_white'):
         os.mkdir('datasets/wine_quality_white')
         url = 'https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv'
-        wget.download(url, out='datasets/wine_quality_white/')
-
-    with open('datasets/wine_quality_white/winequality-white.csv', 'rb') as f:
+        wget.download(url, out='datasets/wine_quality_white/data.csv')
+    with open('datasets/wine_quality_white/data.csv', 'rb') as f:
         df = pd.read_csv(f, delimiter=';')
         Xy = {}
         Xy['data'] = df.values[:, :-1].astype('float')

@@ -40,7 +40,7 @@ class tabular_dataset(Dataset):
     ):
         self.eval_length = eval_length
         np.random.seed(seed)
-
+        os.chdir("E:/Uni/Deakin/OneDrive - Deakin University/MNAR/deep/MNAR/TabCSDI")
         dataset_path = "./data_breast/breast-cancer-wisconsin.data"
         processed_data_path = (
             f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}.pk"

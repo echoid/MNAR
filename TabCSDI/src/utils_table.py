@@ -3,7 +3,7 @@ import torch
 from torch.optim import Adam
 from tqdm import tqdm
 import pickle
-
+import os
 
 def train(
     model,
@@ -14,6 +14,7 @@ def train(
     foldername="",
 ):
     # Control random seed in the current script.
+    print("Foldername",foldername)
     torch.manual_seed(0)
     np.random.seed(0)
     optimizer = Adam(model.parameters(), lr=config["lr"], weight_decay=1e-6)
@@ -99,9 +100,9 @@ def train(
                             },
                             refresh=True,
                         )
-
     if foldername != "":
-        torch.save(model.state_dict(), output_path)
+        torch.save(model.state_dict(), "TabCSDI/"+output_path)
+
 
     # Use folloing code for saving training history.
     # with open(foldername+'/saved_history.pkl', 'wb') as f:

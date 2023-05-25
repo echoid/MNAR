@@ -31,7 +31,7 @@ with open(path, "r") as f:
 config["model"]["is_unconditional"] = args.unconditional
 config["model"]["test_missing_ratio"] = args.testmissingratio
 
-print(json.dumps(config, indent=4))
+#print(json.dumps(config, indent=4))
 
 # Create folder
 current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -48,7 +48,6 @@ train_loader, valid_loader, test_loader = get_dataloader(
     batch_size=config["train"]["batch_size"],
     missing_ratio=config["model"]["test_missing_ratio"],
 )
-print("Get Data loader")
 model = TabCSDI(config, args.device).to(args.device)
 
 if args.modelfolder == "":
