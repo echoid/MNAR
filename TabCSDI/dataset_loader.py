@@ -13,7 +13,7 @@ from missing_mech_test.missing_method import *
 
 
 
-def apply_missing(observed_values,missing_ratio,masks):
+def MCAR(observed_values, missing_ratio, masks):
     for col in range(observed_values.shape[1]):  # col #
 
         obs_indices = np.where(observed_values[:, col])[0]
@@ -24,9 +24,9 @@ def apply_missing(observed_values,missing_ratio,masks):
 
     return masks
 
-def process_func(path: str, aug_rate=1, missing_ratio=0.1):
+def process_func(dataname,path: str, aug_rate=1, missing_ratio=0.1):
  
-    data = dataset_loader("wine_quality_white")
+    data = dataset_loader(dataname)
     # print(data)
     # data.replace("?", np.nan, inplace=True)
     # Don't apply data argument (use n*dataset)
@@ -34,7 +34,6 @@ def process_func(path: str, aug_rate=1, missing_ratio=0.1):
 
 
     observed_values = data["data"].astype("float32")
-    
 
     observed_masks = ~np.isnan(observed_values)
     masks = observed_masks.copy()
@@ -48,7 +47,7 @@ def process_func(path: str, aug_rate=1, missing_ratio=0.1):
     #     masks[miss_indices, col] = False
     
     "Need input origin dataset and parameters"
-    masks = apply_missing(observed_values,missing_ratio,masks)
+    masks = MCAR(observed_values,missing_ratio,masks)
 
 
     # gt_mask: 0 for missing elements and manully maksed elements
@@ -58,28 +57,28 @@ def process_func(path: str, aug_rate=1, missing_ratio=0.1):
     observed_masks = observed_masks.astype(int)
     gt_masks = gt_masks.astype(int)
 
-    return observed_values, observed_masks, gt_masks
+    return observed_values, observed_masks, gt_masks, data["data"].shape[1]
 
 
 class tabular_dataset(Dataset):
     # eval_length should be equal to attributes number.
     def __init__(
-        self, eval_length=11, use_index_list=None, aug_rate=1, missing_ratio=0.1, seed=0
+        self, dataname, use_index_list=None, aug_rate=1, missing_ratio=0.1, seed=0
     ):
-        self.eval_length = eval_length
+        #self.eval_length = eval_length
         np.random.seed(seed)
         
-        dataset_path = "datasets/wine_quality_white/data.csv"
+        dataset_path = f"datasets/{dataname}/data.csv"
         processed_data_path = (
-            f"datasets/wine_quality_white/missing_ratio-{missing_ratio}_seed-{seed}.pk"
+            f"datasets/{dataname}/missing_ratio-{missing_ratio}_seed-{seed}.pk"
         )
         processed_data_path_norm = (
-            f"datasets/wine_quality_white/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
+            f"datasets/{dataname}/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
         )
         # If no dataset created
         if not os.path.isfile(processed_data_path):
-            self.observed_values, self.observed_masks, self.gt_masks = process_func(
-                dataset_path, aug_rate=aug_rate, missing_ratio=missing_ratio
+            self.observed_values, self.observed_masks, self.gt_masks, self.eval_length = process_func(
+                dataname, dataset_path, aug_rate=aug_rate, missing_ratio=missing_ratio
             )
             with open(processed_data_path, "wb") as f:
                 pickle.dump(
@@ -113,9 +112,9 @@ class tabular_dataset(Dataset):
         return len(self.use_index_list)
 
 
-def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
+def get_dataloader(dataname, seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
 
-    dataset = tabular_dataset(missing_ratio=missing_ratio, seed=seed)
+    dataset = tabular_dataset(dataname = dataname,missing_ratio=missing_ratio, seed=seed)
     print(f"Dataset size:{len(dataset)} entries")
     
     
@@ -144,7 +143,7 @@ def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
     # Here we perform max-min normalization.
     print("Here we perform max-min normalization.")
     processed_data_path_norm = (
-        f"datasets/wine_quality_white/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
+        f"datasets/{dataname}/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
     )
     if not os.path.isfile(processed_data_path_norm):
         print(
@@ -161,8 +160,8 @@ def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
             temp = dataset.observed_values[train_index, k]
             max_arr[k] = max(temp[obs_ind])
             min_arr[k] = min(temp[obs_ind])
-        print(f"--------------Max-value for each column {max_arr}--------------")
-        print(f"--------------Min-value for each column {min_arr}--------------")
+        # print(f"--------------Max-value for each column {max_arr}--------------")
+        # print(f"--------------Min-value for each column {min_arr}--------------")
 
         dataset.observed_values = (
             (dataset.observed_values - 0 + 1) / (max_arr - 0 + 1)
@@ -174,16 +173,16 @@ def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
             )
 
     # Create datasets and corresponding data loaders objects.
-    train_dataset = tabular_dataset(
+    train_dataset = tabular_dataset(dataname = dataname,
         use_index_list=train_index, missing_ratio=missing_ratio, seed=seed
     )
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=1)
-    valid_dataset = tabular_dataset(
+    valid_dataset = tabular_dataset(dataname = dataname,
         use_index_list=valid_index, missing_ratio=missing_ratio, seed=seed
     )
     valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=0)
 
-    test_dataset = tabular_dataset(
+    test_dataset = tabular_dataset(dataname = dataname,
         use_index_list=test_index, missing_ratio=missing_ratio, seed=seed
     )
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=0)
