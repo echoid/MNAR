@@ -24,7 +24,7 @@ def MCAR(observed_values, missing_ratio, masks):
 
     return masks
 
-def process_func(dataname,path: str, aug_rate=1, missing_ratio=0.1,missing_type = "MCAR",
+def process_func(dataname,path: str, aug_rate=1,missing_type = "MCAR",
                   missing_para = ""):
  
     data = dataset_loader(dataname)
@@ -68,7 +68,7 @@ class tabular_dataset(Dataset):
     # eval_length should be equal to attributes number.
     def __init__(
         self, dataname, use_index_list=None, 
-        aug_rate=1, missing_ratio=0.1, seed=0,
+        aug_rate=1, seed=0,
         missing_type = "MCAR", missing_para = "",missing_name = "MCAR"
         ):
         #self.eval_length = eval_length
@@ -84,7 +84,7 @@ class tabular_dataset(Dataset):
         # If no dataset created
         if not os.path.isfile(processed_data_path):
             self.observed_values, self.observed_masks, self.gt_masks, self.eval_length = process_func(
-                dataname, dataset_path, aug_rate=aug_rate, missing_ratio=missing_ratio,
+                dataname, dataset_path, aug_rate=aug_rate,
                 missing_type = missing_type, missing_para = missing_para
             )
             # with open(processed_data_path, "wb") as f:
@@ -119,10 +119,10 @@ class tabular_dataset(Dataset):
         return len(self.use_index_list)
 
 
-def get_dataloader(dataname, seed=1, nfold=5, batch_size=16, missing_ratio=0.1,
+def get_dataloader(dataname, seed=1, nfold=5, batch_size=16,
                    missing_type = "MCAR", missing_para = "", missing_name = "MCAR"):
 
-    dataset = tabular_dataset(dataname = dataname,missing_ratio=missing_ratio, seed=seed,
+    dataset = tabular_dataset(dataname = dataname,seed=seed,
                               missing_type = missing_type, missing_para = missing_para,
                                 missing_name = missing_name)
     print(f"Dataset size:{len(dataset)} entries")
@@ -184,18 +184,18 @@ def get_dataloader(dataname, seed=1, nfold=5, batch_size=16, missing_ratio=0.1,
 
     # Create datasets and corresponding data loaders objects.
     train_dataset = tabular_dataset(dataname = dataname,
-        use_index_list=train_index, missing_ratio=missing_ratio, seed=seed,
+        use_index_list=train_index, seed=seed,
         missing_type = missing_type, missing_para = missing_para, missing_name = missing_name
     )
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=1)
     valid_dataset = tabular_dataset(dataname = dataname,
-        use_index_list=valid_index, missing_ratio=missing_ratio, seed=seed,
+        use_index_list=valid_index, seed=seed,
         missing_type = missing_type, missing_para = missing_para, missing_name = missing_name
     )
     valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=0)
 
     test_dataset = tabular_dataset(dataname = dataname,
-        use_index_list=test_index, missing_ratio=missing_ratio, seed=seed,
+        use_index_list=test_index, seed=seed,
         missing_type = missing_type, missing_para = missing_para, missing_name = missing_name
     )
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=0)

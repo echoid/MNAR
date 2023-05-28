@@ -26,7 +26,7 @@ DATASETS = ['iris', 'wine',
             'blood_transfusion', 'breast_cancer_diagnostic', \
             'connectionist_bench_vowel',
              # 'concrete_slump', \
-            'wine_quality_red', 'wine_quality_white']
+            'wine_quality_red', 'wine_quality_white',"banknote"]
 
 
 
@@ -140,6 +140,8 @@ def dataset_loader(dataset):
             data = fetch_wine_quality_red()
         elif dataset == 'wine_quality_white':
             data = fetch_wine_quality_white()
+        elif dataset == 'banknote':
+            data = fetch_banknote()
         #print(dataset,data["data"].shape,len(np.unique(data["target"])))
         return data
 
@@ -177,6 +179,24 @@ def fetch_climate_model_crashes():
     return Xy
 
 
+def fetch_banknote():
+    if not os.path.isdir('datasets/banknote'):
+        os.mkdir('datasets/banknote')
+        url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00267/data_banknote_authentication.txt"
+        wget.download(url, out='datasets/banknote/')
+
+    with open('datasets/banknote/data_banknote_authentication.txt', 'rb') as f:
+        df = pd.read_csv(f, low_memory=False, sep=',')
+        Xy = {}
+        # Ignore the two blocking factor
+        Xy['data'] = df.values[:, :-1]
+        Xy['target'] =  df.values[:, -1]
+
+    return Xy
+
+
+    
+
 def fetch_concrete_compression():
     if not os.path.isdir('datasets/concrete_compression'):
         os.mkdir('datasets/concrete_compression')
@@ -186,7 +206,7 @@ def fetch_concrete_compression():
     with open('datasets/concrete_compression/Concrete_Data.xls', 'rb') as f:
         df = pd.read_excel(io=f)
         Xy = {}
-        Xy['data'] = df.values[:, :-2]
+        Xy['data'] = df.values[:, :-1]
         Xy['target'] =  df.values[:, -1]
 
     return Xy
