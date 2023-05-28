@@ -162,6 +162,8 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
                     },
                     refresh=True,
                 )
+            
+                
 
             # Use folloing code for saving generated results.
             # with open(
@@ -187,7 +189,7 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
             #         f,
             #     )
 
-            with open(foldername + "/result_nsample" + str(nsample) + ".pk", "wb") as f:
+            with open("TabCSDI/"+foldername + "result_nsample" + str(nsample) + ".pk", "wb") as f:
                 pickle.dump(
                     [
                         torch.mean(
