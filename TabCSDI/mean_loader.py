@@ -65,6 +65,7 @@ class tabular_dataset(Dataset):
                 self.observed_values, self.observed_masks, self.gt_masks = pickle.load(
                     f
                 )
+                
             print("--------Normalized dataset loaded--------")
 
         if use_index_list is None:
@@ -84,6 +85,25 @@ class tabular_dataset(Dataset):
 
     def __len__(self):
         return len(self.use_index_list)
+
+
+def getdata(eval_length=10, use_index_list=None, aug_rate=1, missing_ratio=0.1, seed=0):
+    processed_data_path_norm = (
+            f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
+        )
+    with open(processed_data_path_norm, "rb") as f:
+                observed_values, observed_masks, gt_masks = pickle.load(
+                    f
+                )
+
+    s = {
+            "observed_data": observed_values[use_index_list],
+            "observed_mask": observed_masks[use_index_list],
+            "gt_mask": gt_masks[use_index_list],
+        }
+    return s
+
+    
 
 
 def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
@@ -143,6 +163,8 @@ def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
     train_dataset = tabular_dataset(
         use_index_list=train_index, missing_ratio=missing_ratio, seed=seed
     )
+    train_dataset = getdata(use_index_list=train_index, missing_ratio=missing_ratio, seed=seed)
+
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=1)
 
     valid_dataset = tabular_dataset(
@@ -153,10 +175,11 @@ def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
     test_dataset = tabular_dataset(
         use_index_list=test_index, missing_ratio=missing_ratio, seed=seed
     )
+    test_dataset = getdata(use_index_list=test_index, missing_ratio=missing_ratio, seed=seed)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=0)
 
     print(f"Training dataset size: {len(train_dataset)}")
     print(f"Validation dataset size: {len(valid_dataset)}")
     print(f"Testing dataset size: {len(test_dataset)}")
 
-    return train_loader, valid_loader, test_loader
+    return train_dataset, valid_dataset, test_dataset,train_loader, valid_loader, test_loader
