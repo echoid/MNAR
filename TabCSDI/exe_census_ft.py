@@ -6,7 +6,7 @@ import yaml
 import os
 
 from src.main_model_table_ft import TabCSDI
-from src.utils_table import train, evaluate_ft
+from src.utils_table2 import train, evaluate_ft
 
 from dataset_census_ft import get_dataloader
 
