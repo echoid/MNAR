@@ -109,8 +109,6 @@ for rule_name in missing_rule:
         )
     else:
         model.load_state_dict(torch.load("./save/" + args.modelfolder + "/model.pth"))
-    # print("---------------Start testing---------------")
-    # evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
+    print("---------------Start testing---------------")
+    evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
 
-
-    print("After train model:",os.getcwd())
