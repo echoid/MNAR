@@ -6,7 +6,7 @@ import yaml
 import os
 
 from src.main_model_table import TabCSDI
-from src.utils_table2 import train, evaluate_analog
+from MNAR.TabCSDI.src.utils_table import train, evaluate_analog
 from dataset_census_analog import get_dataloader
 
 parser = argparse.ArgumentParser(description="TabCSDI")

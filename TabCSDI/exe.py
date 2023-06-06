@@ -17,7 +17,7 @@ from missing_process.block_rules import *
 
 
 from src.main_model_table import TabCSDI
-from src.utils_table import train, evaluate
+from src.utils_table_new import train, evaluate
 from dataset_loader import get_dataloader
 
 parser = argparse.ArgumentParser(description="TabCSDI")

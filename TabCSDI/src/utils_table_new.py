@@ -101,7 +101,7 @@ def train(
                             refresh=True,
                         )
     if foldername != "":
-        torch.save(model.state_dict(), output_path)
+        torch.save(model.state_dict(), "TabCSDI/"+output_path)
 
 
     # Use folloing code for saving training history.
@@ -189,7 +189,7 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
             #         f,
             #     )
 
-            with open(foldername + "result_nsample" + str(nsample) + ".pk", "wb") as f:
+            with open("TabCSDI/"+foldername + "result_nsample" + str(nsample) + ".pk", "wb") as f:
                 pickle.dump(
                     [
                         torch.mean(

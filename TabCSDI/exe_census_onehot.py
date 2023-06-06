@@ -6,7 +6,7 @@ import yaml
 import os
 
 from src.main_model_table import TabCSDI
-from src.utils_table2 import train, evaluate_onehot
+from MNAR.TabCSDI.src.utils_table import train, evaluate_onehot
 
 from dataset_census_onehot import get_dataloader
 

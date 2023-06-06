@@ -6,7 +6,7 @@ import yaml
 import os
 
 from src.main_model_table import TabCSDI
-from src.utils_table2 import train, evaluate
+from src.utils_table import train, evaluate
 from dataset_breastD import get_dataloader
 
 parser = argparse.ArgumentParser(description="TabCSDI")
@@ -61,5 +61,5 @@ if args.modelfolder == "":
     )
 else:
     model.load_state_dict(torch.load("./save/" + args.modelfolder + "/model.pth"))
-print("---------------Start testing---------------")
-evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
+# print("---------------Start testing---------------")
+# evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
