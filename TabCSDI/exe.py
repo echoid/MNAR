@@ -42,9 +42,10 @@ args.config = "{}.yaml".format(args.config)
 
 print(args.dataset, args.config, args.missingtype)
 
+print("Before load config:",os.getcwd())
 os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
-path = "../config/" + args.config
+path = "/config/" + args.config
 
 with open(path, "r") as f:
     config = yaml.safe_load(f)
@@ -55,10 +56,10 @@ config["model"]["is_unconditional"] = args.unconditional
 #print(json.dumps(config, indent=4))
 
 
-
+print("Before load rule:",os.getcwd())
 
 missing_rule = load_json_file(args.missingpara + ".json")
-
+print("After load rule:",os.getcwd())
 
 for rule_name in missing_rule:
     rule = missing_rule[rule_name]
@@ -70,6 +71,9 @@ for rule_name in missing_rule:
     os.makedirs(foldername, exist_ok=True)
     with open(foldername + "config.json", "w") as f:
         json.dump(config, f, indent=4)
+
+
+    print("Before get data:",os.getcwd())
 
     # Every loader contains "observed_data", "observed_mask", "gt_mask", "timepoints"
     train_loader, valid_loader, test_loader = get_dataloader(
@@ -83,7 +87,7 @@ for rule_name in missing_rule:
 
     )
 
-
+    print("After get data:",os.getcwd())
 
     model = TabCSDI(config, args.device).to(args.device)
 
@@ -100,7 +104,8 @@ for rule_name in missing_rule:
         )
     else:
         model.load_state_dict(torch.load("./save/" + args.modelfolder + "/model.pth"))
-    print("---------------Start testing---------------")
-    evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
+    # print("---------------Start testing---------------")
+    # evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
 
-    
+
+    print("After train model:",os.getcwd())

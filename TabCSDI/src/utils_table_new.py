@@ -15,6 +15,7 @@ def train(
 ):
     # Control random seed in the current script.
     print("Foldername",foldername)
+    print(os.getcwd())
     torch.manual_seed(0)
     np.random.seed(0)
     optimizer = Adam(model.parameters(), lr=config["lr"], weight_decay=1e-6)
@@ -101,7 +102,7 @@ def train(
                             refresh=True,
                         )
     if foldername != "":
-        torch.save(model.state_dict(), "TabCSDI/"+output_path)
+        torch.save(model.state_dict(), output_path)
 
 
     # Use folloing code for saving training history.
