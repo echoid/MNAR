@@ -21,7 +21,7 @@ from src.utils_table_new import train, evaluate
 from dataset_loader import get_dataloader
 
 parser = argparse.ArgumentParser(description="TabCSDI")
-parser.add_argument("--dataset",type = str, default ="wine_quality_white" )
+parser.add_argument("--dataset",type = str, default ="wine_quality_red" )
 parser.add_argument("--config", type=str, default="test") # test
 parser.add_argument("--device", default="cpu", help="Device")
 parser.add_argument("--seed", type=int, default=1)
@@ -32,7 +32,7 @@ parser.add_argument("--modelfolder", type=str, default="")
 parser.add_argument("--nsample", type=int, default=100)
 
 parser.add_argument("--missingtype", type=str, default="MCAR")
-parser.add_argument("--missingpara", type=str, default="missing_rate")
+parser.add_argument("--missingpara", type=str, default="simple_rule")
 #parser.add_argument("--testmissingratio", type=float, default=0.1)
 
 

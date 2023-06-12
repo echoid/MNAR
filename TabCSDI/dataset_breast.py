@@ -8,8 +8,10 @@ from torch.utils.data import DataLoader, Dataset
 
 
 def process_func(path: str, aug_rate=1, missing_ratio=0.1):
-    data = pd.read_csv(path, header=None).iloc[:, 1:]
-    data.replace("?", np.nan, inplace=True)
+    #data = pd.read_csv(path, header=None,sep=";").iloc[:, 1:]
+    data = pd.read_csv(path, delimiter=';').iloc[:, :-1]
+    print(path)
+    #data.replace("?", np.nan, inplace=True)
     data_aug = pd.concat([data] * aug_rate)
 
     observed_values = data_aug.values.astype("float32")
@@ -39,14 +41,19 @@ class tabular_dataset(Dataset):
         self, eval_length=10, use_index_list=None, aug_rate=1, missing_ratio=0.1, seed=0
     ):
         self.eval_length = eval_length
+        self.eval_length = 11
         np.random.seed(seed)
         #os.chdir("E:/Uni/Deakin/OneDrive - Deakin University/MNAR/deep/MNAR/TabCSDI")
         dataset_path = "./data_breast/breast-cancer-wisconsin.data"
+        dataset_path = "./data_wine/winequality-red.csv"
         processed_data_path = (
-            f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}.pk"
+            #f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}.pk"
+            "./data_wine/missing_ratio-{missing_ratio}_seed-{seed}.pk"
         )
+        
         processed_data_path_norm = (
-            f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
+            #f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
+            f"./data_wine/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
         )
 
         if not os.path.isfile(processed_data_path):
@@ -110,7 +117,8 @@ def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
     # Here we perform max-min normalization.
     print("Here we perform max-min normalization.")
     processed_data_path_norm = (
-        f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
+        #f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
+        f"./data_wine/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
     )
     if not os.path.isfile(processed_data_path_norm):
         print(

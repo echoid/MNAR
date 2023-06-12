@@ -35,7 +35,8 @@ config["model"]["test_missing_ratio"] = args.testmissingratio
 
 # Create folder
 current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-foldername = "./save/breast_fold" + str(args.nfold) + "_" + current_time + "/"
+#foldername = "./save/breast_fold" + str(args.nfold) + "_" + current_time + "/"
+foldername = "./save/wine_fold" + str(args.nfold) + "_" + current_time + "/"
 print("model folder:", foldername)
 os.makedirs(foldername, exist_ok=True)
 with open(foldername + "config.json", "w") as f:

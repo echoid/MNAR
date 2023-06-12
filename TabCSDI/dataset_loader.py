@@ -87,6 +87,7 @@ class tabular_dataset(Dataset):
                 dataname, dataset_path, aug_rate=aug_rate,
                 missing_type = missing_type, missing_para = missing_para
             )
+            print("self.eval_length",self.eval_length)
             # with open(processed_data_path, "wb") as f:
             #     pickle.dump(
             #         [self.observed_values, self.observed_masks, self.gt_masks, self.eval_length], f

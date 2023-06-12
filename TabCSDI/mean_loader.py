@@ -1,28 +1,59 @@
+import sys
+sys.path.append("..")
 import pickle
 import yaml
 import os
 import re
+import sys
 import numpy as np
 import pandas as pd
 from torch.utils.data import DataLoader, Dataset
+from data_loaders import *
+import missing_process.missing_method as missing_method
 
 
-def process_func(path: str, aug_rate=1, missing_ratio=0.1):
-    data = pd.read_csv(path, header=None).iloc[:, 1:]
-    data.replace("?", np.nan, inplace=True)
-    data_aug = pd.concat([data] * aug_rate)
 
-    observed_values = data_aug.values.astype("float32")
-    observed_masks = ~np.isnan(observed_values)
-
-    masks = observed_masks.copy()
-    # for each column, mask {missing_ratio} % of observed values.
+def MCAR(observed_values, missing_ratio, masks):
     for col in range(observed_values.shape[1]):  # col #
-        obs_indices = np.where(masks[:, col])[0]
+
+        obs_indices = np.where(observed_values[:, col])[0]
         miss_indices = np.random.choice(
-            obs_indices, (int)(len(obs_indices) * missing_ratio), replace=False
+        obs_indices, (int)(len(obs_indices) * missing_ratio), replace=False
         )
         masks[miss_indices, col] = False
+
+    return masks
+
+def process_func(dataname,path: str, aug_rate=1,missing_type = "MCAR",
+                  missing_para = ""):
+ 
+    data = dataset_loader(dataname)
+    # print(data)
+    # data.replace("?", np.nan, inplace=True)
+    # Don't apply data argument (use n*dataset)
+    # data_aug = pd.concat([data] * aug_rate)
+
+
+    observed_values = data["data"].astype("float32")
+
+    observed_masks = ~np.isnan(observed_values)
+    masks = observed_masks.copy()
+    
+    "Need input origin dataset and parameters"
+    if missing_type == "MCAR":
+        masks = MCAR(observed_values,missing_para,masks)
+
+    elif missing_type == "quantile":
+        Xnan, Xz = missing_method.missing_by_range(observed_values, missing_para)
+        masks = np.array(~np.isnan(Xnan), dtype=np.float)
+
+    elif missing_type == "logistic":
+        masks = missing_method.MNAR_mask_logistic(observed_values, missing_para)
+
+    elif missing_type == "self_mask":
+        masks = missing_method.MNAR_self_mask_logistic(observed_values, missing_para)
+
+
     # gt_mask: 0 for missing elements and manully maksed elements
     gt_masks = masks.reshape(observed_masks.shape)
 
@@ -30,44 +61,45 @@ def process_func(path: str, aug_rate=1, missing_ratio=0.1):
     observed_masks = observed_masks.astype(int)
     gt_masks = gt_masks.astype(int)
 
-    return observed_values, observed_masks, gt_masks
+    return observed_values, observed_masks, gt_masks, data["data"].shape[1]
 
 
 class tabular_dataset(Dataset):
     # eval_length should be equal to attributes number.
     def __init__(
-        self, eval_length=10, use_index_list=None, aug_rate=1, missing_ratio=0.1, seed=0
-    ):
-        self.eval_length = eval_length
+        self, dataname, use_index_list=None, 
+        aug_rate=1, seed=0,
+        missing_type = "MCAR", missing_para = "",missing_name = "MCAR"
+        ):
+        #self.eval_length = eval_length
         np.random.seed(seed)
-        #os.chdir("E:/Uni/Deakin/OneDrive - Deakin University/MNAR/deep/MNAR/TabCSDI")
-        dataset_path = "./data_breast/breast-cancer-wisconsin.data"
+        
+        dataset_path = f"datasets/{dataname}/data.csv"
         processed_data_path = (
-            f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}.pk"
+            f"datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}.pk"
         )
         processed_data_path_norm = (
-            f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
+            f"datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_max-min_norm.pk"
         )
-
+        # If no dataset created
         if not os.path.isfile(processed_data_path):
-            self.observed_values, self.observed_masks, self.gt_masks = process_func(
-                dataset_path, aug_rate=aug_rate, missing_ratio=missing_ratio
+            self.observed_values, self.observed_masks, self.gt_masks, self.eval_length = process_func(
+                dataname, dataset_path, aug_rate=aug_rate,
+                missing_type = missing_type, missing_para = missing_para
             )
-
-            with open(processed_data_path, "wb") as f:
-                pickle.dump(
-                    [self.observed_values, self.observed_masks, self.gt_masks], f
-                )
+            # with open(processed_data_path, "wb") as f:
+            #     pickle.dump(
+            #         [self.observed_values, self.observed_masks, self.gt_masks, self.eval_length], f
+            #     )
             print("--------Dataset created--------")
 
         elif os.path.isfile(processed_data_path_norm):
             with open(processed_data_path_norm, "rb") as f:
-                self.observed_values, self.observed_masks, self.gt_masks = pickle.load(
+                self.observed_values, self.observed_masks, self.gt_masks, self.eval_length = pickle.load(
                     f
                 )
-                
             print("--------Normalized dataset loaded--------")
-
+        
         if use_index_list is None:
             self.use_index_list = np.arange(len(self.observed_values))
         else:
@@ -87,29 +119,15 @@ class tabular_dataset(Dataset):
         return len(self.use_index_list)
 
 
-def getdata(eval_length=10, use_index_list=None, aug_rate=1, missing_ratio=0.1, seed=0):
-    processed_data_path_norm = (
-            f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
-        )
-    with open(processed_data_path_norm, "rb") as f:
-                observed_values, observed_masks, gt_masks = pickle.load(
-                    f
-                )
+def get_dataloader(dataname, seed=1, nfold=5, batch_size=16,
+                   missing_type = "MCAR", missing_para = "", missing_name = "MCAR"):
 
-    s = {
-            "observed_data": observed_values[use_index_list],
-            "observed_mask": observed_masks[use_index_list],
-            "gt_mask": gt_masks[use_index_list],
-        }
-    return s
-
-    
-
-
-def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
-    dataset = tabular_dataset(missing_ratio=missing_ratio, seed=seed)
+    dataset = tabular_dataset(dataname = dataname,seed=seed,
+                              missing_type = missing_type, missing_para = missing_para,
+                                missing_name = missing_name)
     print(f"Dataset size:{len(dataset)} entries")
-
+    
+    
     indlist = np.arange(len(dataset))
 
     np.random.seed(seed + 1)
@@ -117,20 +135,25 @@ def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
 
     tmp_ratio = 1 / nfold
     start = (int)((nfold - 1) * len(dataset) * tmp_ratio)
+    
     end = (int)(nfold * len(dataset) * tmp_ratio)
 
     test_index = indlist[start:end]
     remain_index = np.delete(indlist, np.arange(start, end))
 
     np.random.shuffle(remain_index)
+
+    # Modify here to change train,valid ratio
     num_train = (int)(len(remain_index) * 1)
     train_index = remain_index[:num_train]
     valid_index = remain_index[num_train:]
 
+
+
     # Here we perform max-min normalization.
     print("Here we perform max-min normalization.")
     processed_data_path_norm = (
-        f"./data_breast/missing_ratio-{missing_ratio}_seed-{seed}_max-min_norm.pk"
+        f"datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_max-min_norm.pk"
     )
     if not os.path.isfile(processed_data_path_norm):
         print(
@@ -147,39 +170,40 @@ def get_dataloader(seed=1, nfold=5, batch_size=16, missing_ratio=0.1):
             temp = dataset.observed_values[train_index, k]
             max_arr[k] = max(temp[obs_ind])
             min_arr[k] = min(temp[obs_ind])
-        print(f"--------------Max-value for each column {max_arr}--------------")
-        print(f"--------------Min-value for each column {min_arr}--------------")
+        # print(f"--------------Max-value for each column {max_arr}--------------")
+        # print(f"--------------Min-value for each column {min_arr}--------------")
 
         dataset.observed_values = (
             (dataset.observed_values - 0 + 1) / (max_arr - 0 + 1)
         ) * dataset.observed_masks
 
-        with open(processed_data_path_norm, "wb") as f:
-            pickle.dump(
-                [dataset.observed_values, dataset.observed_masks, dataset.gt_masks], f
-            )
+        # with open(processed_data_path_norm, "wb") as f:
+        #     pickle.dump(
+        #         [dataset.observed_values, dataset.observed_masks, dataset.gt_masks, dataset.eval_length], f
+        #     )
 
-    # Create datasets and corresponding data loaders objects.
-    train_dataset = tabular_dataset(
-        use_index_list=train_index, missing_ratio=missing_ratio, seed=seed
-    )
-    train_dataset = getdata(use_index_list=train_index, missing_ratio=missing_ratio, seed=seed)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=1)
+    # # Create datasets and corresponding data loaders objects.
+    # train_dataset = tabular_dataset(dataname = dataname,
+    #     use_index_list=train_index, seed=seed,
+    #     missing_type = missing_type, missing_para = missing_para, missing_name = missing_name
+    # )
+    # train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=1)
+    # valid_dataset = tabular_dataset(dataname = dataname,
+    #     use_index_list=valid_index, seed=seed,
+    #     missing_type = missing_type, missing_para = missing_para, missing_name = missing_name
+    # )
+    # valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=0)
 
-    valid_dataset = tabular_dataset(
-        use_index_list=valid_index, missing_ratio=missing_ratio, seed=seed
-    )
-    valid_loader = DataLoader(valid_dataset, batch_size=batch_size, shuffle=0)
+    # test_dataset = tabular_dataset(dataname = dataname,
+    #     use_index_list=test_index, seed=seed,
+    #     missing_type = missing_type, missing_para = missing_para, missing_name = missing_name
+    # )
+    # test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=0)
 
-    test_dataset = tabular_dataset(
-        use_index_list=test_index, missing_ratio=missing_ratio, seed=seed
-    )
-    test_dataset = getdata(use_index_list=test_index, missing_ratio=missing_ratio, seed=seed)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=0)
+    # print(f"Training dataset size: {len(train_dataset)}")
+    # print(f"Validation dataset size: {len(valid_dataset)}")
+    # print(f"Testing dataset size: {len(test_dataset)}")
+ 
+    return dataset[train_index], dataset[valid_index], dataset[test_index]
 
-    print(f"Training dataset size: {len(train_dataset)}")
-    print(f"Validation dataset size: {len(valid_dataset)}")
-    print(f"Testing dataset size: {len(test_dataset)}")
-
-    return train_dataset, valid_dataset, test_dataset,train_loader, valid_loader, test_loader

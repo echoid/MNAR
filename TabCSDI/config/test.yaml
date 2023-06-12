@@ -2,7 +2,7 @@
 #type: args
 
 train:
-  epochs: 1
+  epochs: 500
   batch_size: 128
   lr: 0.0005
 
@@ -23,3 +23,4 @@ model:
   featureemb: 16
   target_strategy: "random"
   mixed: False
+

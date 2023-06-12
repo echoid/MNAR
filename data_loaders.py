@@ -465,6 +465,31 @@ def fetch_wine_quality_white():
     return Xy
 
 
+
+def split(n, nfold=5, seed = 1):
+
+    indlist = np.arange((n))
+
+    np.random.seed(seed)
+    np.random.shuffle(indlist)
+
+    tmp_ratio = 1 / nfold
+    start = (int)((nfold - 1) * n * tmp_ratio)
+
+    end = (int)(nfold * n * tmp_ratio)
+
+    test_index = indlist[start:end]
+    remain_index = np.delete(indlist, np.arange(start, end))
+
+    np.random.shuffle(remain_index)
+
+    # Modify here to change train,valid ratio
+    num_train = (int)(len(remain_index) * 0.8)
+    train_index = remain_index[:num_train]
+    valid_index = remain_index[num_train:]
+
+    return train_index,valid_index,test_index
+
 def normal_split(data):
     # ---- load data
 
