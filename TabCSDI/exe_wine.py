@@ -7,10 +7,10 @@ import os
 
 from src.main_model_table import TabCSDI
 from src.utils_table import train, evaluate
-from dataset_breast import get_dataloader
+from dataset_wine import get_dataloader
 
 parser = argparse.ArgumentParser(description="TabCSDI")
-parser.add_argument("--config", type=str, default="breast.yaml")
+parser.add_argument("--config", type=str, default="test.yaml")
 parser.add_argument("--device", default="cpu", help="Device")
 parser.add_argument("--seed", type=int, default=1)
 parser.add_argument("--testmissingratio", type=float, default=0.2)
@@ -35,7 +35,8 @@ config["model"]["test_missing_ratio"] = args.testmissingratio
 
 # Create folder
 current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-foldername = "./save/breast_fold" + str(args.nfold) + "_" + current_time + "/"
+#foldername = "./save/breast_fold" + str(args.nfold) + "_" + current_time + "/"
+foldername = "./save/wine_fold" + str(args.nfold) + "_" + current_time + "/"
 print("model folder:", foldername)
 os.makedirs(foldername, exist_ok=True)
 with open(foldername + "config.json", "w") as f:

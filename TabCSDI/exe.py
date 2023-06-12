@@ -14,8 +14,6 @@ from missing_process.block_rules import *
 #dataname = "wine_quality_white"
 
 
-
-
 from src.main_model_table import TabCSDI
 from src.utils_table_new import train, evaluate
 from dataset_loader import get_dataloader

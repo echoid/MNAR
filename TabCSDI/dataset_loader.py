@@ -32,13 +32,14 @@ def process_func(dataname,path: str, aug_rate=1,missing_type = "MCAR",
     # data.replace("?", np.nan, inplace=True)
     # Don't apply data argument (use n*dataset)
     # data_aug = pd.concat([data] * aug_rate)
-
+    print("Exe")
+    print(data)
 
     observed_values = data["data"].astype("float32")
 
     observed_masks = ~np.isnan(observed_values)
     masks = observed_masks.copy()
-    
+
     "Need input origin dataset and parameters"
     if missing_type == "MCAR":
         masks = MCAR(observed_values,missing_para,masks)
@@ -88,10 +89,10 @@ class tabular_dataset(Dataset):
                 missing_type = missing_type, missing_para = missing_para
             )
             print("self.eval_length",self.eval_length)
-            # with open(processed_data_path, "wb") as f:
-            #     pickle.dump(
-            #         [self.observed_values, self.observed_masks, self.gt_masks, self.eval_length], f
-            #     )
+            with open(processed_data_path, "wb") as f:
+                pickle.dump(
+                    [self.observed_values, self.observed_masks, self.gt_masks, self.eval_length], f
+                )
             print("--------Dataset created--------")
 
         elif os.path.isfile(processed_data_path_norm):
@@ -178,10 +179,10 @@ def get_dataloader(dataname, seed=1, nfold=5, batch_size=16,
             (dataset.observed_values - 0 + 1) / (max_arr - 0 + 1)
         ) * dataset.observed_masks
 
-        # with open(processed_data_path_norm, "wb") as f:
-        #     pickle.dump(
-        #         [dataset.observed_values, dataset.observed_masks, dataset.gt_masks, dataset.eval_length], f
-        #     )
+        with open(processed_data_path_norm, "wb") as f:
+            pickle.dump(
+                [dataset.observed_values, dataset.observed_masks, dataset.gt_masks, dataset.eval_length], f
+            )
 
     # Create datasets and corresponding data loaders objects.
     train_dataset = tabular_dataset(dataname = dataname,
