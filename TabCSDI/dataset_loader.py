@@ -32,8 +32,6 @@ def process_func(dataname,path: str, aug_rate=1,missing_type = "MCAR",
     # data.replace("?", np.nan, inplace=True)
     # Don't apply data argument (use n*dataset)
     # data_aug = pd.concat([data] * aug_rate)
-    print("Exe")
-    print(data)
 
     observed_values = data["data"].astype("float32")
 
@@ -153,7 +151,6 @@ def get_dataloader(dataname, seed=1, nfold=5, batch_size=16,
 
 
     # Here we perform max-min normalization.
-    print("Here we perform max-min normalization.")
     processed_data_path_norm = (
         f"datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_max-min_norm.pk"
     )
@@ -172,8 +169,8 @@ def get_dataloader(dataname, seed=1, nfold=5, batch_size=16,
             temp = dataset.observed_values[train_index, k]
             max_arr[k] = max(temp[obs_ind])
             min_arr[k] = min(temp[obs_ind])
-        # print(f"--------------Max-value for each column {max_arr}--------------")
-        # print(f"--------------Min-value for each column {min_arr}--------------")
+        print(f"--------------Max-value for each column {max_arr}--------------")
+        print(f"--------------Min-value for each column {min_arr}--------------")
 
         dataset.observed_values = (
             (dataset.observed_values - 0 + 1) / (max_arr - 0 + 1)

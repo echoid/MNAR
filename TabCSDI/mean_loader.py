@@ -10,6 +10,7 @@ import pandas as pd
 from torch.utils.data import DataLoader, Dataset
 from data_loaders import *
 import missing_process.missing_method as missing_method
+from sklearn.metrics import mean_squared_error
 
 
 
@@ -26,7 +27,6 @@ def MCAR(observed_values, missing_ratio, masks):
 
 def process_func(dataname,path: str, aug_rate=1,missing_type = "MCAR",
                   missing_para = ""):
- 
     data = dataset_loader(dataname)
     # print(data)
     # data.replace("?", np.nan, inplace=True)
@@ -74,12 +74,12 @@ class tabular_dataset(Dataset):
         #self.eval_length = eval_length
         np.random.seed(seed)
         
-        dataset_path = f"datasets/{dataname}/data.csv"
+        dataset_path = f"../datasets/{dataname}/data.csv"
         processed_data_path = (
-            f"datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}.pk"
+            f"../datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}.pk"
         )
         processed_data_path_norm = (
-            f"datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_max-min_norm.pk"
+            f"../datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_max-min_norm.pk"
         )
         # If no dataset created
         if not os.path.isfile(processed_data_path):
@@ -151,10 +151,10 @@ def get_dataloader(dataname, seed=1, nfold=5, batch_size=16,
 
 
     # Here we perform max-min normalization.
-    print("Here we perform max-min normalization.")
     processed_data_path_norm = (
-        f"datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_max-min_norm.pk"
+        f"../datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_max-min_norm.pk"
     )
+    
     if not os.path.isfile(processed_data_path_norm):
         print(
             "--------------Dataset has not been normalized yet. Perform data normalization and store the mean value of each column.--------------"
