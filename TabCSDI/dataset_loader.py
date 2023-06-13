@@ -144,7 +144,7 @@ def get_dataloader(dataname, seed=1, nfold=5, batch_size=16,
     np.random.shuffle(remain_index)
 
     # Modify here to change train,valid ratio
-    num_train = (int)(len(remain_index) * 1)
+    num_train = (int)(len(remain_index) * 0.9)
     train_index = remain_index[:num_train]
     valid_index = remain_index[num_train:]
 

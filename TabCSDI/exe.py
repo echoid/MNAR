@@ -67,9 +67,9 @@ for rule_name in missing_rule:
     foldername = "./save/{}_fold".format(args.dataset) + str(args.nfold) + "_" + current_time + "/"
     
 
-    os.makedirs(foldername, exist_ok=True)
-    with open(foldername + "config.json", "w") as f:
-        json.dump(config, f, indent=4)
+    # os.makedirs(foldername, exist_ok=True)
+    # with open(foldername + "config.json", "w") as f:
+    #     json.dump(config, f, indent=4)
 
 
  
@@ -87,26 +87,26 @@ for rule_name in missing_rule:
     )
 
 
-    if os.getcwd().endswith('MNAR'):
-        os.chdir("TabCSDI")
+    # if os.getcwd().endswith('MNAR'):
+    #     os.chdir("TabCSDI")
 
 
 
-    model = TabCSDI(config, args.device).to(args.device)
+    # model = TabCSDI(config, args.device).to(args.device)
 
    
 
-    if args.modelfolder == "":
-        print("model train")
-        train(
-            model,
-            config["train"],
-            train_loader,
-            valid_loader=valid_loader,
-            foldername=foldername,
-        )
-    else:
-        model.load_state_dict(torch.load("./save/" + args.modelfolder + "/model.pth"))
-    print("---------------Start testing---------------")
-    evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
+    # if args.modelfolder == "":
+    #     print("model train")
+    #     train(
+    #         model,
+    #         config["train"],
+    #         train_loader,
+    #         valid_loader=valid_loader,
+    #         foldername=foldername,
+    #     )
+    # else:
+    #     model.load_state_dict(torch.load("./save/" + args.modelfolder + "/model.pth"))
+    # print("---------------Start testing---------------")
+    # evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
 
