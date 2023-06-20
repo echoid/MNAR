@@ -6,6 +6,8 @@ sys.path.append(os.getcwd())
 from MIWAE import MIWAE
 from notMIWAE import notMIWAE
 import trainer
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning) 
 import utils
 
 parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
@@ -19,7 +21,7 @@ import json
 from sklearn.impute import SimpleImputer
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
-
+from sklearn.ensemble import RandomForestRegressor
 
 
 
@@ -30,14 +32,20 @@ dataset = sys.argv[1] # dataset = ["banknote","concrete_compression","wine_quali
 
 mechanism = sys.argv[2]
 
+def check_and_fill_nan(array, reference_array):
+    num_rows, num_cols = array.shape
 
+    for col_idx in range(num_cols):
+        if np.all(np.isnan(array[:, col_idx])):
+            array[0, col_idx] = np.nanmean(reference_array[:, col_idx])
 
-def run_baseline():
+    return array
+
+def run_baseline(multiple_block,rule_name):
     RMSE_mean = []
     RMSE_MICE = []
     data_shape, dl, train_idx, test_idx, valid_idx, full_data, mask = load_data_index(dataset, mechanism, rule_name)
 
-    print(train_idx, test_idx, valid_idx)
 
     Xtrain = full_data[train_idx]
     Xtest = full_data[test_idx]
@@ -50,6 +58,9 @@ def run_baseline():
     Xnan = Xtrain.copy()
     Xz = Xtrain.copy()
     Xnan[Xtrain_mask == 0] = np.nan
+
+    Xnan = check_and_fill_nan(Xnan,Xtrain)
+
     Xz[Xtrain_mask == 0] = 0
     S = np.array(~np.isnan(Xnan), dtype=np.float)
     
@@ -65,6 +76,8 @@ def run_baseline():
     X_test_z[Xtest_mask == 0] = 0
     S_test = np.array(~np.isnan(X_test_nan), dtype=np.float)
 
+    
+
 
     # ------------------------- #
     # ---- mean imputation ---- #
@@ -75,12 +88,21 @@ def run_baseline():
     RMSE_mean.append(np.sqrt(np.sum((Xtest - Ximp) ** 2 * (1 - S_test)) / np.sum(1 - S_test)))
 
     # ------------------------- #
-    # ---- mean imputation ---- #
+    # ---- MICE imputation ---- #
     # ------------------------- #
     imp_MICE = IterativeImputer(random_state=0)
     imp_MICE.fit(Xnan)
-    imp_MICE.transform(X_test_nan)
+    Ximp = imp_MICE.transform(X_test_nan)
     RMSE_MICE.append(np.sqrt(np.sum((Xtest - Ximp) ** 2 * (1 - S_test)) / np.sum(1 - S_test)))
+
+
+    print("Data Set:",dataset, mechanism)
+    print("Data Shape: ", data_shape)
+    if mechanism == "quantile":
+        print("Missing Block:", rule_name)
+
+    print("RMSE_mean = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mean), np.std(RMSE_mean)))
+    print("RMSE_miwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_MICE), np.std(RMSE_MICE)))
 
 
 

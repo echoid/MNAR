@@ -291,7 +291,7 @@ class MIWAE:
 
     def val_batch(self):
 
-        batch_size = 100
+        batch_size = 50
         val_loss = 0.0
         pxz = 0.0
         pz = 0.0

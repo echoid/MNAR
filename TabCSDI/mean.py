@@ -6,6 +6,7 @@ import yaml
 import os
 import sys
 import numpy as np
+import pandas as pd
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import IterativeImputer
 from sklearn.linear_model import LinearRegression
@@ -44,7 +45,14 @@ args = parser.parse_args()
 
 #print(json.dumps(config, indent=4))
 
+def check_and_fill_nan(array, reference_array):
+    num_rows, num_cols = array.shape
 
+    for col_idx in range(num_cols):
+        if np.all(np.isnan(array[:, col_idx])):
+            array[0, col_idx] = np.nanmean(reference_array[:, col_idx])
+
+    return array
 
 
 missing_rule = load_json_file(args.missingpara + ".json")
@@ -152,8 +160,7 @@ for rule_name in missing_rule:
     train_nan[train_mask == 0] = np.nan
     test_nan[test_mask == 0] = np.nan
 
-    # print(train_nan.shape)
-    # print(test_nan.shape)
+    train_nan = check_and_fill_nan(train_nan,train_obs)
 
     S_train = np.array(~np.isnan(train_nan), dtype=float)
     S_test = np.array(~np.isnan(test_nan), dtype=float)
@@ -168,6 +175,8 @@ for rule_name in missing_rule:
 
     train_imp = imp.transform(train_nan)
     test_imp = imp.transform(test_nan)
+
+
 
     train_rmse = np.sqrt(np.sum((train_obs - train_imp) ** 2 * (1 - S_train)) / np.sum(1 - S_train))
     test_rmse = np.sqrt(np.sum((test_obs - test_imp) ** 2 * (1 - S_test)) / np.sum(1 - S_test))

@@ -33,7 +33,6 @@ name = '/tmp/uci/task01/best'
 n_hidden = 128
 n_samples = 20
 max_iter = 100000
-max_iter = 1
 batch_size = 16
 L = 10000
 
@@ -87,6 +86,10 @@ def run_one(multiple_block=None,rule_name = None):
 
         #data_shape, Xtrain, Xval_org, Xtest, Ytrain, Yval_org , Ytest, dl = preprocessing(dataset)
         data_shape, dl, train_idx, test_idx, valid_idx,full_data, mask = load_data_index(dataset, mechanism, rule_name)
+
+        print(len(train_idx), len(test_idx), len(valid_idx))
+        print(full_data.shape)
+
 
         Xtrain = full_data[train_idx]
         Xtest = full_data[test_idx]
