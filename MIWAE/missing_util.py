@@ -2,8 +2,9 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
-import torch
+#import torch
 import pickle
+import os
 
 # https://rmisstastic.netlify.app/how-to/python/generate_html/how%20to%20generate%20missing%20values
 #import wget
@@ -202,9 +203,9 @@ def preprocessing(url):
 
 
 def load_data_index(dataname,missing_type,missing_name,seed = 1):
-
+    print(os.getcwd())
     processed_data_path_norm = (
-            f"../datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_max-min_norm.pk"
+            f"datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_max-min_norm.pk"
         )
     with open(processed_data_path_norm, "rb") as f:
             observed_values, observed_masks, gt_masks, eval_length = pickle.load(

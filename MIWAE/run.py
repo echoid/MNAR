@@ -98,17 +98,21 @@ def run_one(multiple_block=None,rule_name = None):
 
         Xnan = Xtrain.copy()
         Xz = Xtrain.copy()
-
         Xnan[Xtrain_mask == 0] = np.nan
         Xz[Xtrain_mask == 0] = 0
         S = np.array(~np.isnan(Xnan), dtype=np.float)
+        
 
         Xval  = Xval_org.copy()
         Xvalz = Xval_org.copy()
         Xval[Xval_org_mask == 0] = np.nan
         Xvalz[Xval_org_mask == 0] = 0
 
-
+        X_test_nan = Xtest.copy()
+        X_test_z = Xtest.copy()
+        X_test_nan[Xtest_mask == 0] = np.nan
+        X_test_z[Xtest_mask == 0] = 0
+        S_test = np.array(~np.isnan(X_test_nan), dtype=np.float)
         # # ---- introduce missing process
         # if mechanism == "quantile":
         #     Xnan, Xz = missing_by_range(Xtrain, multiple_block)
@@ -136,7 +140,8 @@ def run_one(multiple_block=None,rule_name = None):
 
         # ---- find imputation RMSE
         #RMSE_miwae.append(utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)[0])
-        rmse, Ximp = utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)
+        #rmse, Ximp = utils.imputationRMSE(miwae, Xtrain, Xz, Xnan, S, L)
+        rmse, Ximp = utils.imputationRMSE(miwae, Xtest, X_test_z, X_test_nan, S_test, L)
         RMSE_miwae.append(rmse)
         # ---- find imputation ML util
         #ML_miwae.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
@@ -153,7 +158,8 @@ def run_one(multiple_block=None,rule_name = None):
         trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
         # ---- find imputation RMSE
-        rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        #rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        rmse, Ximp = utils.imputationRMSE(notmiwae, Xtest, X_test_z, X_test_nan, S_test, L)
         RMSE_notmiwae.append(rmse)
         #ML_notmiwae.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
 
@@ -167,7 +173,8 @@ def run_one(multiple_block=None,rule_name = None):
         trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
         # ---- find imputation RMSE
-        rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        #rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        rmse, Ximp = utils.imputationRMSE(notmiwae, Xtest, X_test_z, X_test_nan, S_test, L)
         RMSE_notmiwae_selfmasking.append(rmse)
         #ML_notmiwae_selfmasking.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
 
@@ -180,7 +187,8 @@ def run_one(multiple_block=None,rule_name = None):
         trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
         # ---- find imputation RMSE
-        rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        #rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        rmse, Ximp = utils.imputationRMSE(notmiwae, Xtest, X_test_z, X_test_nan, S_test, L)
         RMSE_notmiwae_linear.append(rmse)
         #ML_notmiwae_linear.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
 
@@ -192,8 +200,8 @@ def run_one(multiple_block=None,rule_name = None):
         # ------------------------- #
         imp = SimpleImputer(missing_values=np.nan, strategy='mean')
         imp.fit(Xnan)
-        Ximp = imp.transform(Xnan)
-        RMSE_mean.append(np.sqrt(np.sum((Xtrain - Ximp) ** 2 * (1 - S)) / np.sum(1 - S)))
+        Ximp = imp.transform(X_test_nan)
+        RMSE_mean.append(np.sqrt(np.sum((Xtest - Ximp) ** 2 * (1 - S_test)) / np.sum(1 - S_test)))
         
         #ML_mean.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
 

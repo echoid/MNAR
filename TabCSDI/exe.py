@@ -21,7 +21,7 @@ from dataset_loader import get_dataloader
 parser = argparse.ArgumentParser(description="TabCSDI")
 parser.add_argument("--dataset",type = str, default ="wine_quality_red" )
 parser.add_argument("--config", type=str, default="test") # test
-parser.add_argument("--device", default="cuda", help="Device")
+parser.add_argument("--device", default="cpu", help="Device")
 parser.add_argument("--seed", type=int, default=1)
 
 parser.add_argument("--nfold", type=int, default=5, help="for 5-fold test")
@@ -67,7 +67,7 @@ for rule_name in missing_rule:
     foldername = "./save/{}_fold".format(args.dataset) + str(args.nfold) + "_" + current_time + "/"
     
 
-    # os.makedirs(foldername, exist_ok=True)
+    os.makedirs(foldername, exist_ok=True)
     # with open(foldername + "config.json", "w") as f:
     #     json.dump(config, f, indent=4)
 
@@ -87,26 +87,26 @@ for rule_name in missing_rule:
     )
 
 
-    # if os.getcwd().endswith('MNAR'):
-    #     os.chdir("TabCSDI")
+    if os.getcwd().endswith('MNAR'):
+        os.chdir("TabCSDI")
 
 
 
-    # model = TabCSDI(config, args.device).to(args.device)
+    model = TabCSDI(config, args.device).to(args.device)
 
    
 
-    # if args.modelfolder == "":
-    #     print("model train")
-    #     train(
-    #         model,
-    #         config["train"],
-    #         train_loader,
-    #         valid_loader=valid_loader,
-    #         foldername=foldername,
-    #     )
-    # else:
-    #     model.load_state_dict(torch.load("./save/" + args.modelfolder + "/model.pth"))
-    # print("---------------Start testing---------------")
-    # evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
+    if args.modelfolder == "":
+        print("model train")
+        train(
+            model,
+            config["train"],
+            train_loader,
+            valid_loader=valid_loader,
+            foldername=foldername,
+        )
+    else:
+        model.load_state_dict(torch.load("./save/" + args.modelfolder + "/model.pth"))
+    print("---------------Start testing---------------")
+    evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
 
