@@ -84,6 +84,7 @@ def run_one(multiple_block=None,rule_name = None):
 
     for _ in range(runs):
 
+        rule_name = "Q4_complete"
         #data_shape, Xtrain, Xval_org, Xtest, Ytrain, Yval_org , Ytest, dl = preprocessing(dataset)
         data_shape, dl, train_idx, test_idx, valid_idx,full_data, mask = load_data_index(dataset, mechanism, rule_name)
 
@@ -116,6 +117,9 @@ def run_one(multiple_block=None,rule_name = None):
         X_test_nan[Xtest_mask == 0] = np.nan
         X_test_z[Xtest_mask == 0] = 0
         S_test = np.array(~np.isnan(X_test_nan), dtype=np.float)
+
+        print(Xtrain)
+        exit()
         # # ---- introduce missing process
         # if mechanism == "quantile":
         #     Xnan, Xz = missing_by_range(Xtrain, multiple_block)
@@ -238,7 +242,7 @@ def run_one(multiple_block=None,rule_name = None):
 
 if mechanism == "quantile":
     json_name = sys.argv[3]
-    # json_name = ["q1_quantile","q2_quantile","quantile","three_block_quantile", "complete"]
+    # json_name = ["double_quantile_1","double_quantile_2","single_quantile"]
     missing_rule = load_json_file(json_name + ".json")
 
 

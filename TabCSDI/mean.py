@@ -61,7 +61,7 @@ missing_rule = load_json_file(args.missingpara + ".json")
 for rule_name in missing_rule:
     rule = missing_rule[rule_name]
     print("========")
-    print("Current Rule",rule )
+    print("Current Rule",rule_name )
     # Create folder
 
 
@@ -76,7 +76,9 @@ for rule_name in missing_rule:
         batch_size=128,
         missing_type = args.missingtype,
         missing_para = rule,
-        missing_name = rule_name
+        missing_name = rule_name,
+        scale = "standard"
+        #scale = "minmax"
 
     )
 
@@ -166,20 +168,22 @@ for rule_name in missing_rule:
     S_test = np.array(~np.isnan(test_nan), dtype=float)
 
 
-
+# ------------------------------------------------------------------------------
     imp = SimpleImputer(missing_values=np.nan, strategy='mean')
     imp.fit(train_nan)
-
-    
-
-
     train_imp = imp.transform(train_nan)
     test_imp = imp.transform(test_nan)
-
-
-
     train_rmse = np.sqrt(np.sum((train_obs - train_imp) ** 2 * (1 - S_train)) / np.sum(1 - S_train))
     test_rmse = np.sqrt(np.sum((test_obs - test_imp) ** 2 * (1 - S_test)) / np.sum(1 - S_test))
+
+#-------------------------------------------------------------
+
+    # imp_MICE = IterativeImputer(random_state=0)
+    # imp_MICE.fit(train_nan)
+    # train_imp = imp_MICE.transform(train_nan)
+    # test_imp = imp_MICE.transform(test_nan)
+    # train_rmse = np.sqrt(np.sum((train_obs - train_imp) ** 2 * (1 - S_train)) / np.sum(1 - S_train))
+    # test_rmse = np.sqrt(np.sum((test_obs - test_imp) ** 2 * (1 - S_test)) / np.sum(1 - S_test))
 
     #print("Train RMSE: ", train_rmse)
     print("Test RMSE: " , test_rmse)
