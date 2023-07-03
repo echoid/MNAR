@@ -19,7 +19,7 @@ def nanmean(v, *args, **kwargs):
 #### Quantile ######
 def quantile(X, q, dim=None):
     """
-    Returns the q-th quantile.
+    Returns the q-th quantile.""
 
     Parameters
     ----------
