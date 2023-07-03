@@ -69,7 +69,7 @@ class tabular_dataset(Dataset):
     def __init__(
         self, dataname, use_index_list=None, 
         aug_rate=1, seed=0,
-        missing_type = "MCAR", missing_para = "",missing_name = "MCAR"
+        missing_type = "MCAR", missing_para = "",missing_name = "MCAR", scale = "minmax"
         ):
         #self.eval_length = eval_length
         np.random.seed(seed)
@@ -80,6 +80,9 @@ class tabular_dataset(Dataset):
         )
         processed_data_path_norm = (
             f"../datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_max-min_norm.pk"
+        )
+        processed_data_path_standard = (
+            f"../datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_standard_norm.pk"
         )
         # If no dataset created
         if not os.path.isfile(processed_data_path):
@@ -93,12 +96,27 @@ class tabular_dataset(Dataset):
             #     )
             print("--------Dataset created--------")
 
-        elif os.path.isfile(processed_data_path_norm):
+        elif scale == "minmax" and os.path.isfile(processed_data_path_norm):
             with open(processed_data_path_norm, "rb") as f:
                 self.observed_values, self.observed_masks, self.gt_masks, self.eval_length = pickle.load(
                     f
                 )
-            print("--------Normalized dataset loaded--------")
+            print("--------Minmax - Normalized dataset loaded--------")
+
+        elif scale != "minmax" and os.path.isfile(processed_data_path_standard):
+            with open(processed_data_path_standard, "rb") as f:
+                self.observed_values, self.observed_masks, self.gt_masks, self.eval_length = pickle.load(
+                    f
+                )
+            print("--------Standard Normalized dataset loaded--------")
+
+        elif os.path.isfile(processed_data_path):
+            with open(processed_data_path, "rb") as f:
+                self.observed_values, self.observed_masks, self.gt_masks, self.eval_length = pickle.load(
+                    f
+                )
+            print("--------dataset loaded--------")
+
         
         if use_index_list is None:
             self.use_index_list = np.arange(len(self.observed_values))
@@ -120,11 +138,11 @@ class tabular_dataset(Dataset):
 
 
 def get_dataloader(dataname, seed=1, nfold=5, batch_size=16,
-                   missing_type = "MCAR", missing_para = "", missing_name = "MCAR"):
+                   missing_type = "MCAR", missing_para = "", missing_name = "MCAR",scale = "minmax"):
 
     dataset = tabular_dataset(dataname = dataname,seed=seed,
                               missing_type = missing_type, missing_para = missing_para,
-                                missing_name = missing_name)
+                                missing_name = missing_name, scale = scale)
     print(f"Dataset size:{len(dataset)} entries")
     
     
@@ -154,8 +172,10 @@ def get_dataloader(dataname, seed=1, nfold=5, batch_size=16,
     processed_data_path_norm = (
         f"../datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_max-min_norm.pk"
     )
-    
-    if not os.path.isfile(processed_data_path_norm):
+    processed_data_path_standard = (
+        f"../datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_standard_norm.pk"
+        )
+    if (scale == "minmax") and (not os.path.isfile(processed_data_path_norm)):
         print(
             "--------------Dataset has not been normalized yet. Perform data normalization and store the mean value of each column.--------------"
         )
@@ -177,10 +197,38 @@ def get_dataloader(dataname, seed=1, nfold=5, batch_size=16,
             (dataset.observed_values - 0 + 1) / (max_arr - 0 + 1)
         ) * dataset.observed_masks
 
-        # with open(processed_data_path_norm, "wb") as f:
-        #     pickle.dump(
-        #         [dataset.observed_values, dataset.observed_masks, dataset.gt_masks, dataset.eval_length], f
-        #     )
+        with open(processed_data_path_norm, "wb") as f:
+            pickle.dump(
+                [dataset.observed_values, dataset.observed_masks, dataset.gt_masks, dataset.eval_length], f
+            )
+
+    elif (scale != "minmax") and (not os.path.isfile(processed_data_path_standard)):
+        print(
+            "--------------Dataset has not been normalized yet. Perform data standard normalization and store the mean value of each column.--------------"
+        )
+        # data transformation after train-test split.
+        col_num = dataset.observed_values.shape[1]
+        max_arr = np.zeros(col_num)
+        min_arr = np.zeros(col_num)
+        mean_arr = np.zeros(col_num)
+        std_arr = np.zeros(col_num)
+        for k in range(col_num):
+            # Using observed_mask to avoid counting missing values.
+            obs_ind = dataset.observed_masks[train_index, k].astype(bool)
+            temp = dataset.observed_values[train_index, k]
+            mean_arr[k] = np.mean(temp[obs_ind])
+            std_arr[k] = np.std(temp[obs_ind])
+        # print(f"--------------Max-value for each column {max_arr}--------------")
+        # print(f"--------------Min-value for each column {min_arr}--------------")
+
+        dataset.observed_values = (
+            (dataset.observed_values - mean_arr) / (std_arr)
+        ) * dataset.observed_masks
+
+        with open(processed_data_path_standard, "wb") as f:
+            pickle.dump(
+                [dataset.observed_values, dataset.observed_masks, dataset.gt_masks, dataset.eval_length], f
+            )
 
 
     # # Create datasets and corresponding data loaders objects.
