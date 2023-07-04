@@ -17,6 +17,7 @@ import sys
 from torch.utils.data import DataLoader, Dataset
 from data_loaders import *
 import missing_process.missing_method as missing_method
+from missing_process.block_rules import *
 
 
 
@@ -31,7 +32,7 @@ def MCAR(observed_values, missing_ratio, masks):
 
     return masks
 
-def process_func(dataname,path: str, aug_rate=1,missing_type = "MCAR",
+def process_func(dataname, path: str, aug_rate=1,missing_type = "MCAR",
                   missing_para = ""):
  
     data = dataset_loader(dataname)
@@ -217,10 +218,7 @@ def get_dataloader(dataname, seed=1, nfold=5, batch_size=16,
 
 
 
-parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
-sys.path.append(parent_directory)
 
-from missing_process.OT_rules import *
 
 #dataname = "wine_quality_white"
 
@@ -237,7 +235,7 @@ parser.add_argument("--unconditional", action="store_true", default=0)
 parser.add_argument("--modelfolder", type=str, default="")
 parser.add_argument("--nsample", type=int, default=100)
 
-parser.add_argument("--missingtype", type=str, default="MCAR")
+parser.add_argument("--missingtype", type=str, default="self_mask")
 parser.add_argument("--missingpara", type=str, default="simple_rule")
 #parser.add_argument("--testmissingratio", type=float, default=0.1)
 
@@ -257,7 +255,7 @@ for rule_name in missing_rule:
         dataname=args.dataset,
         seed=args.seed,
         nfold=args.nfold,
-        batch_size=config["train"]["batch_size"],
+        batch_size=128,
         missing_type = args.missingtype,
         missing_para = rule,
         missing_name = rule_name

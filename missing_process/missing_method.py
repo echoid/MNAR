@@ -527,3 +527,34 @@ def missing_by_range(X,multiple_block,missing_dim=1):
     Xz[np.isnan(Xnan)] = 0
 
     return Xnan, Xz
+
+
+def diffuse_mnar_single(data, up_percentile = 0.5, obs_percentile = 0.5):
+    
+    def scale_data(data):
+        min_vals = np.min(data, axis=0)
+        max_vals = np.max(data, axis=0)
+        scaled_data = (data - min_vals) / (max_vals - min_vals)
+        return scaled_data
+
+    data = scale_data(data)
+
+    mask = np.ones(data.shape)
+
+    n_cols = data.shape[1]
+    n_miss_cols = int(n_cols * 0.5)  # 选择50%的列作为缺失列
+    miss_cols = np.random.choice(n_cols, size=n_miss_cols, replace=False)  # 随机选择缺失列的索引
+
+    obs_cols = [col for col in range(data.shape[1]) if col not in miss_cols]
+    
+    for miss_col in miss_cols:
+        missvar_bounds = np.quantile(data[:, miss_col], up_percentile)
+        temp = data[:, miss_col] > missvar_bounds
+        
+        obsvar_bounds = np.quantile(data[temp][:, obs_cols], obs_percentile)
+        temp2 = data[:, miss_col] > obsvar_bounds
+
+        merged_temp = np.logical_or(temp, temp2).astype(int)
+        mask[:, miss_col] = merged_temp
+    print("Missing Rate",1 - np.count_nonzero(mask) / mask.size)
+    return mask
