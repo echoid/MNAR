@@ -110,3 +110,5 @@ for rule_name in missing_rule:
     print("---------------Start testing---------------")
     evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
 
+    exit()
+

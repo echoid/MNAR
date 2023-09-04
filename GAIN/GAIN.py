@@ -7,28 +7,38 @@ import pandas as pd
 from tqdm import tqdm
 from torch.utils.data import Dataset, DataLoader
 import torch.nn.functional as F
-from utility import xavier_init,MyDataset,preprocess,load_dataloader
+from GAIN_imputer_utility import xavier_init,MyDataset,preprocess,load_dataloader
 from sklearn.impute import SimpleImputer
 parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(parent_directory)
-from MNAR.missing_process.block_rules import *
+os.chdir("../")
+from missing_process.block_rules import *
 
 
 #dataset_file = "banknote"#'concrete_compression', "wine_quality_red","wine_quality_white"
   # 'Letter.csv' for Letter dataset an 'Spam.csv' for Spam dataset
-missing_type = "quantile"
-
+# missing_type = "quantile"
+missing_type = sys.argv[2]
 
 dataset_file = sys.argv[1]
 
-missing_rule = ["Q1_complete","Q1_partial","Q2_complete","Q2_partial","Q3_complete","Q3_partial","Q4_complete","Q4_partial",
-"Q1_Q2_complete","Q1_Q2_partial","Q1_Q3_complete","Q1_Q3_partial","Q1_Q4_complete","Q1_Q4_partial","Q2_Q3_complete","Q2_Q3_partial",
-"Q2_Q4_complete","Q2_Q4_partial","Q3_Q4_complete","Q3_Q4_partial"]
+
+if missing_type == "quantile":
+
+    missing_rule = ["Q1_complete","Q1_partial","Q2_complete","Q2_partial","Q3_complete","Q3_partial","Q4_complete","Q4_partial",
+    "Q1_Q2_complete","Q1_Q2_partial","Q1_Q3_complete","Q1_Q3_partial","Q1_Q4_complete","Q1_Q4_partial","Q2_Q3_complete","Q2_Q3_partial",
+    "Q2_Q4_complete","Q2_Q4_partial","Q3_Q4_complete","Q3_Q4_partial"]
+
+elif missing_type == "diffuse":
+    missing_rule = [0.5,0.75,0.25]
+
+elif missing_type =="logistic":
+    missing_rule = [0.5,0.75,0.25]
 
 
 #%% System Parameters
 batch_size = 64
-epoch = 100
+epoch = 10000
 
 
 
@@ -157,7 +167,8 @@ def test_g_loss(X, M, New_X,generator):
     #%% MSE Performance metric
     MSE_test_loss = torch.mean(((1-M) * X - (1-M)*G_sample)**2) / torch.mean(1-M)
 
-    return MSE_test_loss ,G_sample
+    imputed = impute_with_prediction(X,M,G_sample)
+    return MSE_test_loss ,G_sample,imputed
 
 
 
@@ -179,6 +190,7 @@ def run(dataset_file,missing_rule):
 
     Imputer_RMSE = []
     baseline_RMSE = []
+    rule_list = []
     
     for rule_name in missing_rule:
         trainX, testX, train_Mask, test_Mask, train_input, test_input, No, Dim, train_H,test_H = load_dataloader(dataset_file,missing_type, rule_name)
@@ -187,7 +199,7 @@ def run(dataset_file,missing_rule):
         train_dataset, test_dataset = MyDataset(trainX, train_Mask,train_input,train_H), MyDataset(testX, test_Mask, test_input,test_H)
 
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
-        test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+        test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
         G = Imputation_model(Dim, Dim, Dim)
         D = Discriminator_model(Dim, Dim, Dim)
@@ -228,15 +240,20 @@ def run(dataset_file,missing_rule):
         with torch.no_grad():
             G.eval()
             RMSE_total = []
+            imputed_total = []
             for truth_X, mask, data_X, h in test_loader:
-                RMSE, prediction =  test_g_loss(X=truth_X, M=mask, New_X=data_X,generator = G)
+                RMSE, prediction,imputed =  test_g_loss(X=truth_X, M=mask, New_X=data_X,generator = G)
                 RMSE_total.append(RMSE)
+                imputed_total.append(imputed)
 
 
         RMSE_tensor = torch.tensor(RMSE_total)
         rmse_final = torch.mean(RMSE_tensor)
 
         Imputer_RMSE.append(round(rmse_final.item(),5))
+
+        pd.DataFrame(torch.cat(imputed_total, 0).detach().numpy()).to_csv("results/gain/Imputation_{}_{}_{}.csv".format(dataset_file,missing_type,rule_name),index=False)
+  
 
         print('Final Test RMSE: {:.4f}'.format(rmse_final.item()))
 
@@ -262,10 +279,12 @@ def run(dataset_file,missing_rule):
 
 
         baseline_RMSE.append(round(test_rmse,5))
+        rule_list.append(rule_name)
 
 
-    result = pd.DataFrame({"Missing_Rule":[rule_name for rule_name in missing_rule],"Imputer RMSE":Imputer_RMSE,"Baseline RMSE":baseline_RMSE})
-    result.to_csv("results/{}_GAIN.csv".format(dataset_file),index=False)
+
+    result = pd.DataFrame({"Missing_Rule":rule_list,"Imputer RMSE":Imputer_RMSE,"Baseline RMSE":baseline_RMSE})
+    result.to_csv("results/gain/RMSE_{}_{}.csv".format(dataset_file,missing_type),index=False)
 
 
 run(dataset_file,missing_rule)
