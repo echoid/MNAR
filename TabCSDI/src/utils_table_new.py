@@ -216,7 +216,7 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
                 torch.mean(torch.sqrt(torch.div(mse_total, evalpoints_total))).item(),
             )
 
-            return torch.mean(torch.sqrt(torch.div(mse_total, evalpoints_total))).item(), all_impute_sample
+            return torch.mean(torch.sqrt(torch.div(mse_total, evalpoints_total))).item(), all_impute_sample,all_target, all_evalpoint
 
 
 def evaluate_analog(
