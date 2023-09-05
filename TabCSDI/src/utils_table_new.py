@@ -52,7 +52,8 @@ def train(
             lr_scheduler.step()
 
         if valid_loader is not None and (epoch_no + 1) % valid_epoch_interval == 0:
-            print("Start validation")
+        #if True:
+            print("--------Start validation--------")
             model.eval()
             avg_loss_valid = 0
             # some initial settings
@@ -126,8 +127,10 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
         all_observed_time = []
         all_evalpoint = []
         all_generated_samples = []
+        all_impute_sample = []
         with tqdm(test_loader, mininterval=5.0, maxinterval=50.0) as it:
             for batch_no, test_batch in enumerate(it, start=1):
+                
                 output = model.evaluate(test_batch, nsample)
 
                 samples, c_target, eval_points, observed_points, observed_time = output
@@ -136,14 +139,21 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
                 eval_points = eval_points.permute(0, 2, 1)
                 observed_points = observed_points.permute(0, 2, 1)
 
+  #              print("sample shape",samples.shape)
                 # take the median from samples.
                 samples_median = samples.median(dim=1)
+                # print("median value",samples_median.values)
+                # print("median shape",samples_median.values.shape)
+                imputed = torch.squeeze(samples_median.values)
+                # print("sqz median value",sqz)
+                # print("sqz median shape",sqz.shape)
 
                 all_target.append(c_target)
                 all_evalpoint.append(eval_points)
                 all_observed_point.append(observed_points)
                 all_observed_time.append(observed_time)
                 all_generated_samples.append(samples)
+                all_impute_sample.append(imputed)
 
                 mse_current = (
                     ((samples_median.values - c_target) * eval_points) ** 2
@@ -163,7 +173,8 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
                     },
                     refresh=True,
                 )
-            
+                
+
             #---------------------------------
                 
 
@@ -204,6 +215,8 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
                 "RMSE:",
                 torch.mean(torch.sqrt(torch.div(mse_total, evalpoints_total))).item(),
             )
+
+            return torch.mean(torch.sqrt(torch.div(mse_total, evalpoints_total))).item(), all_impute_sample
 
 
 def evaluate_analog(

@@ -224,7 +224,7 @@ class CSDI_base(nn.Module):
             cond_mask = gt_mask
             target_mask = observed_mask - cond_mask
             side_info = self.get_side_info(observed_tp, cond_mask)
-
+            
             samples = self.impute(observed_data, cond_mask, side_info, n_samples)
 
         return samples, observed_data, target_mask, observed_mask, observed_tp

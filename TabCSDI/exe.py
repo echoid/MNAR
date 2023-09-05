@@ -5,6 +5,7 @@ import json
 import yaml
 import os
 import sys
+import pandas as pd
 
 parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(parent_directory)
@@ -20,7 +21,7 @@ from dataset_loader import get_dataloader
 
 parser = argparse.ArgumentParser(description="TabCSDI")
 parser.add_argument("--dataset",type = str, default ="wine_quality_red" )
-parser.add_argument("--config", type=str, default="test") # test
+parser.add_argument("--config", type=str, default="common") # test
 parser.add_argument("--device", default="cpu", help="Device")
 parser.add_argument("--seed", type=int, default=1)
 
@@ -57,7 +58,8 @@ config["model"]["is_unconditional"] = args.unconditional
 
 
 missing_rule = load_json_file(args.missingpara + ".json")
-
+rule_list = []
+rmse_list =  []
 
 for rule_name in missing_rule:
     rule = missing_rule[rule_name]
@@ -108,7 +110,13 @@ for rule_name in missing_rule:
     else:
         model.load_state_dict(torch.load("./save/" + args.modelfolder + "/model.pth"))
     print("---------------Start testing---------------")
-    evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
+    rmse, samples = evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
 
-    exit()
+    pd.DataFrame(torch.cat(samples, 0).detach().numpy()).to_csv("../results/tabcsdi/Imputation_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name),index=False)
 
+
+    rule_list.append(rule_name)
+    rmse_list.append(rmse)
+
+result = pd.DataFrame({"Missing_Rule":rule_list,"Imputer RMSE":rmse_list})
+result.to_csv("../results/tabcsdi/RMSE_{}_{}.csv".format(args.dataset,args.missingtype),index=False)
