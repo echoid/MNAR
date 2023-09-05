@@ -1,0 +1,4 @@
+Missing_Rule,Imputer RMSE,Baseline RMSE
+0.5,0.04632,0.13919
+0.75,0.03012,0.14608
+0.25,0.06484,0.16447

@@ -1,0 +1,21 @@
+Missing_Rule,Imputer RMSE,Baseline RMSE
+Q1_complete,0.41334,0.67396
+Q1_partial,0.07618,0.32141
+Q2_complete,0.05051,0.09387
+Q2_partial,0.0106,0.08104
+Q3_complete,0.03788,0.11156
+Q3_partial,0.14465,0.09703
+Q4_complete,0.52705,0.63379
+Q4_partial,0.03841,0.29196
+Q1_Q2_complete,0.66637,0.87705
+Q1_Q2_partial,0.04813,0.25204
+Q1_Q3_complete,0.3247,0.48203
+Q1_Q3_partial,0.04143,0.22474
+Q1_Q4_complete,1.1563,1.0293
+Q1_Q4_partial,0.07051,0.27827
+Q2_Q3_complete,0.08,0.09611
+Q2_Q3_partial,0.01994,0.08346
+Q2_Q4_complete,0.35557,0.45013
+Q2_Q4_partial,0.03822,0.20683
+Q3_Q4_complete,0.63041,0.78749
+Q3_Q4_partial,0.02486,0.23756

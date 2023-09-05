@@ -140,7 +140,7 @@ dmypy.json
 
 
 /save/
-results
+#results
 
 TabCSDI/save
 .Rproj.user
