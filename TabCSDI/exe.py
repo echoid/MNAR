@@ -113,8 +113,8 @@ for rule_name in missing_rule:
     rmse, samples, original,mask = evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
 
     pd.DataFrame(torch.cat(samples, 0).detach().numpy()).to_csv("../results/tabcsdi/Imputation_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name),index=False)
-    pd.DataFrame(torch.cat(original, 0).detach().numpy()).to_csv("../results/tabcsdi/Origin_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name),index=False)
-    pd.DataFrame(torch.cat(mask, 0).detach().numpy()).to_csv("../results/tabcsdi/Mask_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name),index=False)
+    # pd.DataFrame(torch.cat(original, 0).detach().numpy()).to_csv("../results/tabcsdi/Origin_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name),index=False)
+    # pd.DataFrame(torch.cat(mask, 0).detach().numpy()).to_csv("../results/tabcsdi/Mask_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name),index=False)
 
     rule_list.append(rule_name)
     rmse_list.append(rmse)

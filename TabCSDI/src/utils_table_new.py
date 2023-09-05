@@ -148,8 +148,8 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
                 # print("sqz median value",sqz)
                 # print("sqz median shape",sqz.shape)
 
-                all_target.append(c_target)
-                all_evalpoint.append(eval_points)
+                all_target.append(torch.squeeze(c_target))
+                all_evalpoint.append(torch.squeeze(eval_points))
                 all_observed_point.append(observed_points)
                 all_observed_time.append(observed_time)
                 all_generated_samples.append(samples)
