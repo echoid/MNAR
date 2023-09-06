@@ -10,3 +10,8 @@ GAIN:
 cd MNAR/GAIN
 python GAIN.py banknote quantile
 
+MCflow
+
+cd MNAR/MCFlow
+python main.py --dataset banknote --missingtype quantile --missingpara single_quantile
+

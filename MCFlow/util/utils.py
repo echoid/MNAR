@@ -1,7 +1,7 @@
 import os
 import sys
 import csv
-import wget
+#import wget
 import zipfile
 import numpy as np
 import pandas as pd
@@ -405,7 +405,7 @@ def path_to_matrix(path):
         except:
             print("\nDownloading OnlineNewsPopularity dataset\n")
             ssl._create_default_https_context = ssl._create_unverified_context
-            wget.download('https://archive.ics.uci.edu/ml/machine-learning-databases/00332/OnlineNewsPopularity.zip')
+            #wget.download('https://archive.ics.uci.edu/ml/machine-learning-databases/00332/OnlineNewsPopularity.zip')
             with zipfile.ZipFile('OnlineNewsPopularity.zip', 'r') as zip_ref:
                 zip_ref.extractall('./data/')
             os.remove("OnlineNewsPopularity.zip")

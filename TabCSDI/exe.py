@@ -61,6 +61,10 @@ missing_rule = load_json_file(args.missingpara + ".json")
 rule_list = []
 rmse_list =  []
 
+
+
+
+
 for rule_name in missing_rule:
     rule = missing_rule[rule_name]
     print("Current Rule",rule )
@@ -120,4 +124,4 @@ for rule_name in missing_rule:
     rmse_list.append(rmse)
 
 result = pd.DataFrame({"Missing_Rule":rule_list,"Imputer RMSE":rmse_list})
-result.to_csv("../results/tabcsdi/RMSE_{}_{}.csv".format(args.dataset,args.missingtype),index=False)
+result.to_csv("../results/tabcsdi/RMSE_{}_{}.csv".format(args.dataset,args.missingpara),index=False)
