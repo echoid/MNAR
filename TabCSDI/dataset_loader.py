@@ -176,10 +176,10 @@ def get_dataloader(dataname, seed=1, nfold=5, batch_size=16,
             (dataset.observed_values - 0 + 1) / (max_arr - 0 + 1)
         ) * dataset.observed_masks
 
-        with open(processed_data_path_norm, "wb") as f:
-            pickle.dump(
-                [dataset.observed_values, dataset.observed_masks, dataset.gt_masks, dataset.eval_length], f
-            )
+        # with open(processed_data_path_norm, "wb") as f:
+        #     pickle.dump(
+        #         [dataset.observed_values, dataset.observed_masks, dataset.gt_masks, dataset.eval_length], f
+        #     )
 
     # Create datasets and corresponding data loaders objects.
     train_dataset = tabular_dataset(dataname = dataname,
