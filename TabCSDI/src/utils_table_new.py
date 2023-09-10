@@ -52,12 +52,12 @@ def train(
             lr_scheduler.step()
 
         if valid_loader is not None and (epoch_no + 1) % valid_epoch_interval == 0:
-        #if True:
-            print("--------Start validation--------")
+            print("--------Start Validation--------")
             model.eval()
             avg_loss_valid = 0
             # some initial settings
             val_nsample = 15
+            # val_nsample = 2
             val_scaler = 1
             mse_total = 0
             mae_total = 0
@@ -80,9 +80,20 @@ def train(
                         c_target = c_target.permute(0, 2, 1)  # (B,L,K)
                         eval_points = eval_points.permute(0, 2, 1)
                         observed_points = observed_points.permute(0, 2, 1)
+                       
+                        
 
-                        # take the median from samples.
+                        # 使用 torch.unique 函数来查找独特的张量
+                        # flattened_tensor = samples.view(128, 2, 11)
+                        # unique_tensors, counts = torch.unique(flattened_tensor, dim=1, return_counts=True)
+
+                        # 如果所有的 counts 都为 1，表示每个张量都是唯一的
+                        # if torch.all(counts == 1):
+                        #     print("所有的张量都是唯一的")
+                        # else:
+                        #     print("至少有一个张量是重复的")
                         samples_median = samples.median(dim=1)
+
                         mse_current = (
                             ((samples_median.values - c_target) * eval_points) ** 2
                         ) * (val_scaler**2)
@@ -92,11 +103,14 @@ def train(
 
                         mse_total += torch.sum(mse_current, dim=0)
                         evalpoints_total += torch.sum(eval_points, dim=0)
+                        # print("mse_total",mse_total)
+                        # print("evalpoints_total",evalpoints_total)
 
                         it.set_postfix(
                             ordered_dict={
                                 "rmse_total": torch.mean(
-                                    torch.sqrt(torch.div(mse_total, evalpoints_total))
+                                    #torch.sqrt(torch.div(mse_total, evalpoints_total))
+                                    torch.where(evalpoints_total > 0, torch.sqrt(torch.div(mse_total, evalpoints_total)), torch.zeros_like(mse_total))
                                 ).item(),
                                 "batch_no": batch_no,
                             },
@@ -139,6 +153,10 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
                 eval_points = eval_points.permute(0, 2, 1)
                 observed_points = observed_points.permute(0, 2, 1)
 
+                # print("samples",samples)
+                # print("samples shape",samples.shape)
+
+
   #              print("sample shape",samples.shape)
                 # take the median from samples.
                 samples_median = samples.median(dim=1)
@@ -147,6 +165,9 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
                 imputed = torch.squeeze(samples_median.values)
                 # print("sqz median value",sqz)
                 # print("sqz median shape",sqz.shape)
+                # print("samples_median",samples_median)
+                # print("impute shape",imputed.shape)
+                # print("impute ",imputed)
 
                 all_target.append(torch.squeeze(c_target))
                 all_evalpoint.append(torch.squeeze(eval_points))
@@ -158,6 +179,8 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
                 mse_current = (
                     ((samples_median.values - c_target) * eval_points) ** 2
                 ) * (scaler**2)
+                #print("eval_point",eval_points)
+                #print("DIfference:",torch.sum((samples_median.values - c_target)* eval_points))
                 mae_current = (
                     torch.abs((samples_median.values - c_target) * eval_points)
                 ) * scaler
@@ -167,13 +190,13 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
                 it.set_postfix(
                     ordered_dict={
                         "rmse_total": torch.mean(
-                            torch.sqrt(torch.div(mse_total, evalpoints_total))
+                            #torch.sqrt(torch.div(mse_total, evalpoints_total))
+                            torch.where(evalpoints_total > 0, torch.sqrt(torch.div(mse_total, evalpoints_total)), torch.zeros_like(mse_total))
                         ).item(),
                         "batch_no": batch_no,
                     },
                     refresh=True,
                 )
-                
 
             #---------------------------------
                 
@@ -206,17 +229,22 @@ def evaluate(model, test_loader, nsample=100, scaler=1, mean_scaler=0, foldernam
                 pickle.dump(
                     [
                         torch.mean(
-                            torch.sqrt(torch.div(mse_total, evalpoints_total))
+                            #torch.sqrt(torch.div(mse_total, evalpoints_total))
+                            torch.where(evalpoints_total > 0, torch.sqrt(torch.div(mse_total, evalpoints_total)), torch.zeros_like(mse_total))
                         ).item(),
                     ],
                     f,
                 )
+            RMSE = torch.mean(
+                    #torch.sqrt(torch.div(mse_total, evalpoints_total))).item(),
+                    torch.where(evalpoints_total > 0, torch.sqrt(torch.div(mse_total, evalpoints_total)), torch.zeros_like(mse_total))
+            ).item()
             print(
                 "RMSE:",
-                torch.mean(torch.sqrt(torch.div(mse_total, evalpoints_total))).item(),
+                RMSE
             )
 
-            return torch.mean(torch.sqrt(torch.div(mse_total, evalpoints_total))).item(), all_impute_sample,all_target, all_evalpoint
+            return RMSE, all_impute_sample,all_target, all_evalpoint
 
 
 def evaluate_analog(

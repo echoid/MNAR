@@ -140,6 +140,7 @@ class CSDI_base(nn.Module):
         return total_input
 
     def impute(self, observed_data, cond_mask, side_info, n_samples):
+
         B, K, L = observed_data.shape
         imputed_samples = torch.zeros(B, n_samples, K, L).to(self.device)
 

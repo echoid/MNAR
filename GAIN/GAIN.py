@@ -39,7 +39,7 @@ elif missing_type =="logistic":
 #%% System Parameters
 batch_size = 64
 epoch = 10000
-
+epoch = 20
 
 
 class Simple_imputer(nn.Module):
@@ -252,7 +252,7 @@ def run(dataset_file,missing_rule):
 
         Imputer_RMSE.append(round(rmse_final.item(),5))
 
-        pd.DataFrame(torch.cat(imputed_total, 0).detach().numpy()).to_csv("results/gain/Imputation_{}_{}_{}.csv".format(dataset_file,missing_type,rule_name),index=False)
+        #pd.DataFrame(torch.cat(imputed_total, 0).detach().numpy()).to_csv("results/gain/Imputation_{}_{}_{}.csv".format(dataset_file,missing_type,rule_name),index=False)
   
 
         print('Final Test RMSE: {:.4f}'.format(rmse_final.item()))
@@ -284,7 +284,7 @@ def run(dataset_file,missing_rule):
 
 
     result = pd.DataFrame({"Missing_Rule":rule_list,"Imputer RMSE":Imputer_RMSE,"Baseline RMSE":baseline_RMSE})
-    result.to_csv("results/gain/RMSE_{}_{}.csv".format(dataset_file,missing_type),index=False)
+    result.to_csv("results/gain/RMSE_{}_{}_1.csv".format(dataset_file,missing_type),index=False)
 
 
 run(dataset_file,missing_rule)

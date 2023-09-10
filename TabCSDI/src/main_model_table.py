@@ -156,6 +156,7 @@ class CSDI_base(nn.Module):
                     ] ** 0.5 * noise
                     noisy_cond_history.append(noisy_obs * cond_mask)
 
+            #torch.manual_seed(42)
             current_sample = torch.randn_like(observed_data)
 
             # perform T steps backward
@@ -220,13 +221,14 @@ class CSDI_base(nn.Module):
             cut_length,
         ) = self.process_data(batch)
 
+        print("Start Evaluate")
+
         with torch.no_grad():
             cond_mask = gt_mask
             target_mask = observed_mask - cond_mask
             side_info = self.get_side_info(observed_tp, cond_mask)
             
             samples = self.impute(observed_data, cond_mask, side_info, n_samples)
-
         return samples, observed_data, target_mask, observed_mask, observed_tp
 
 
@@ -245,6 +247,8 @@ class TabCSDI(CSDI_base):
         observed_tp = batch["timepoints"].to(self.device).float()
 
         gt_mask = batch["gt_mask"][:, np.newaxis, :]
+
+
 
         gt_mask = gt_mask.to(self.device).float()
 

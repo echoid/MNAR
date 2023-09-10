@@ -45,9 +45,11 @@ def process_func(dataname,path: str, aug_rate=1,missing_type = "MCAR",
     elif missing_type == "quantile":
         Xnan, Xz = missing_method.missing_by_range(observed_values, missing_para)
         masks = np.array(~np.isnan(Xnan), dtype=np.float)
+        
 
     elif missing_type == "logistic":
         masks = missing_method.MNAR_mask_logistic(observed_values, missing_para)
+ 
 
     elif missing_type == "self_mask":
         masks = missing_method.MNAR_self_mask_logistic(observed_values, missing_para)
@@ -98,8 +100,23 @@ class tabular_dataset(Dataset):
                 self.observed_values, self.observed_masks, self.gt_masks, self.eval_length = pickle.load(
                     f
                 )
-            print("--------Normalized dataset loaded--------")
-        
+
+                            # Calculate the percentage of zeros
+            # zero_percentage = (self.gt_masks == 0).mean() * 100
+
+            # print(f"0的占比: {zero_percentage}%")
+
+            # # Check for columns with all zeros
+            # all_zero_columns = np.all(self.gt_masks == 1, axis=0)
+
+            # if any(all_zero_columns):
+            #     print("存在一列全部为1的情况")
+            #     # If you want to print the indices of the all-zero columns:
+            #     zero_column_indices = np.where(all_zero_columns)[0]
+            #     print("全部为1的列的索引:", zero_column_indices)
+            # else:
+            #     print("没有一列全部为1的情况")
+                    
         if use_index_list is None:
             self.use_index_list = np.arange(len(self.observed_values))
         else:

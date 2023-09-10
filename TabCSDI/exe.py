@@ -91,6 +91,7 @@ for rule_name in missing_rule:
         missing_name = rule_name
 
     )
+    
 
 
     if os.getcwd().endswith('MNAR'):
@@ -100,7 +101,7 @@ for rule_name in missing_rule:
 
     model = TabCSDI(config, args.device).to(args.device)
 
-   
+
 
     if args.modelfolder == "":
         print("model train")
@@ -113,6 +114,7 @@ for rule_name in missing_rule:
         )
     else:
         model.load_state_dict(torch.load("./save/" + args.modelfolder + "/model.pth"))
+
     print("---------------Start testing---------------")
     rmse, samples, original,mask = evaluate(model, test_loader, nsample=args.nsample, scaler=1, foldername=foldername)
 
@@ -122,6 +124,7 @@ for rule_name in missing_rule:
 
     rule_list.append(rule_name)
     rmse_list.append(rmse)
+
 
 result = pd.DataFrame({"Missing_Rule":rule_list,"Imputer RMSE":rmse_list})
 result.to_csv("../results/tabcsdi/RMSE_{}_{}.csv".format(args.dataset,args.missingpara),index=False)
