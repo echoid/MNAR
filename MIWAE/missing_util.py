@@ -206,7 +206,7 @@ def load_data_index(args,rule_name):
     print(os.getcwd())
 
     processed_data_path_norm = (
-            f"../datasets/{args.dataset}/{args.missingtype}-{rule_name}_seed-{args.seed}_max-min_norm.pk"
+            f"datasets/{args.dataset}/{args.missingtype}-{rule_name}_seed-{args.seed}_max-min_norm.pk"
         )
     with open(processed_data_path_norm, "rb") as f:
             observed_values, observed_masks, gt_masks, eval_length = pickle.load(

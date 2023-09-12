@@ -11,10 +11,11 @@ from MIWAE import MIWAE
 from notMIWAE import notMIWAE
 import trainer
 import utils
+import json
 
 parent_directory = os.path.abspath(os.path.join(os.path.dirname(__file__), os.pardir))
 sys.path.append(parent_directory)
-from missing_process.block_rules import *
+#from missing_process.block_rules import *
 from missing_util import load_data_index
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
@@ -30,7 +31,7 @@ def run_one(args, rule_name):
 
 
     for run in range(args.runs):
-
+        print("Before I go to",os.getcwd())
         data_shape, dl, train_idx, test_idx, valid_idx,full_data, mask = load_data_index(args,rule_name)
 
 
@@ -71,7 +72,7 @@ def run_one(args, rule_name):
         trainer.train(miwae, batch_size=args.batch_size, max_iter=args.max_iter, name='miwae')
         # ---- find imputation RMSE
         rmse, Ximp = utils.imputationRMSE(miwae, Xtest, X_test_z, X_test_nan, S_test, args.L)
-        pd.DataFrame(Ximp).to_csv("../results/miwae/Imputation_{}_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name,run),index=False)
+        pd.DataFrame(Ximp).to_csv("results/miwae/Imputation_{}_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name,run),index=False)
         RMSE_miwae.append(rmse)
 
 
@@ -88,7 +89,7 @@ def run_one(args, rule_name):
 
         # ---- find imputation RMSE
         rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtest, X_test_z, X_test_nan, S_test, args.L)
-        pd.DataFrame(Ximp).to_csv("../results/notmiwae/Imputation_{}_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name,run),index=False)
+        pd.DataFrame(Ximp).to_csv("results/notmiwae/Imputation_{}_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name,run),index=False)
         RMSE_notmiwae.append(rmse)
         
 
@@ -124,8 +125,11 @@ args = parser.parse_args()
 
 
 
-
-
+def load_json_file(filename):
+    json_path = os.path.join("missing_process/block_rules", filename)
+    with open(json_path) as f:
+        return json.load(f)
+print(os.getcwd())
 missing_rule = load_json_file(args.missingpara + ".json")
 rule_list = []
 notmiwae_rmse_list =  []
@@ -147,9 +151,9 @@ for rule_name in missing_rule:
     rule_list.append(rule_name)
 
 result = pd.DataFrame({"Missing_Rule":rule_list,"MIWAE_RMSE":miwae_rmse_list,"MIWAE_STD":miwae_rmse_std_list})
-result.to_csv("../results/miwae/RMSE_{}_{}.csv".format(args.dataset,args.missingpara),index=False)
+result.to_csv("results/miwae/RMSE_{}_{}.csv".format(args.dataset,args.missingpara),index=False)
 
 
 result = pd.DataFrame({"Missing_Rule":rule_list,"NotMIWAE_RMSE":notmiwae_rmse_list,"NotMIWAE_STD":notmiwae_rmse_std_list})
-result.to_csv("../results/notmiwae/RMSE_{}_{}.csv".format(args.dataset,args.missingpara),index=False)
+result.to_csv("results/notmiwae/RMSE_{}_{}.csv".format(args.dataset,args.missingpara),index=False)
 print("Experiment completed")
