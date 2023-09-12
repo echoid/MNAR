@@ -126,5 +126,5 @@ if __name__ == "__main__":
         rule_list.append(rule_name)
 
     result = pd.DataFrame({"Missing_Rule":rule_list,"Imputer RMSE":rmse_list})
-    result.to_csv("../results/mcflow/RMSE_{}_{}.csv".format(args.dataset,args.missingtype),index=False)
+    result.to_csv("../results/mcflow/RMSE_{}_{}.csv".format(args.dataset,args.rule_name),index=False)
     print("Experiment completed")
