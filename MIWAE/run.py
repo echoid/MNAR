@@ -5,6 +5,7 @@ import numpy as np
 import pandas as pd
 import os
 import sys
+import argparse
 sys.path.append(os.getcwd())
 from MIWAE import MIWAE
 from notMIWAE import notMIWAE
@@ -39,17 +40,17 @@ L = 10000
 # ---- choose the missing model
 # mprocess = 'linear'
 # mprocess = 'selfmasking'
-mprocess = 'selfmasking_known'
+#mprocess = 'selfmasking_known'
 
 
 
-url1 = "https://archive.ics.uci.edu/ml/machine-learning-databases/00267/data_banknote_authentication.txt"
+# url1 = "https://archive.ics.uci.edu/ml/machine-learning-databases/00267/data_banknote_authentication.txt"
 
-url2 = "https://archive.ics.uci.edu/ml/machine-learning-databases/concrete/compressive/Concrete_Data.xls"
+# url2 = "https://archive.ics.uci.edu/ml/machine-learning-databases/concrete/compressive/Concrete_Data.xls"
 
-url3 = "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv"
+# url3 = "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-white.csv"
 
-url4= "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
+# url4= "https://archive.ics.uci.edu/ml/machine-learning-databases/wine-quality/winequality-red.csv"
 
 
 # ---- number of runs
@@ -70,9 +71,9 @@ def run_one(multiple_block=None,rule_name = None):
 
     RMSE_miwae = []
     RMSE_notmiwae = []
-    RMSE_notmiwae_selfmasking = []
-    RMSE_notmiwae_linear = []
-    RMSE_mean = []
+    # RMSE_notmiwae_selfmasking = []
+    # RMSE_notmiwae_linear = []
+    # RMSE_mean = []
 
     # ML_miwae = []
     # ML_notmiwae = []
@@ -119,7 +120,7 @@ def run_one(multiple_block=None,rule_name = None):
         S_test = np.array(~np.isnan(X_test_nan), dtype=np.float)
 
         print(Xtrain)
-        exit()
+
         # # ---- introduce missing process
         # if mechanism == "quantile":
         #     Xnan, Xz = missing_by_range(Xtrain, multiple_block)
@@ -171,33 +172,33 @@ def run_one(multiple_block=None,rule_name = None):
         #ML_notmiwae.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
 
 
-        # ---------------------- #
-        # ---- fit not-MIWAE---- #
-        # ---------------------- #
-        notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="selfmasking", name=name)
+        # # ---------------------- #
+        # # ---- fit not-MIWAE---- #
+        # # ---------------------- #
+        # notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="selfmasking", name=name)
 
-        # ---- do the training
-        trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
+        # # ---- do the training
+        # trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
-        # ---- find imputation RMSE
-        #rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
-        rmse, Ximp = utils.imputationRMSE(notmiwae, Xtest, X_test_z, X_test_nan, S_test, L)
-        RMSE_notmiwae_selfmasking.append(rmse)
-        #ML_notmiwae_selfmasking.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
+        # # ---- find imputation RMSE
+        # #rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        # rmse, Ximp = utils.imputationRMSE(notmiwae, Xtest, X_test_z, X_test_nan, S_test, L)
+        # RMSE_notmiwae_selfmasking.append(rmse)
+        # #ML_notmiwae_selfmasking.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
 
-        # ---------------------- #
-        # ---- fit not-MIWAE---- #
-        # ---------------------- #
-        notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="linear", name=name)
+        # # ---------------------- #
+        # # ---- fit not-MIWAE---- #
+        # # ---------------------- #
+        # notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=n_samples, n_hidden=n_hidden, missing_process="linear", name=name)
 
-        # ---- do the training
-        trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
+        # # ---- do the training
+        # trainer.train(notmiwae, batch_size=batch_size, max_iter=max_iter, name=name + 'notmiwae')
 
-        # ---- find imputation RMSE
-        #rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
-        rmse, Ximp = utils.imputationRMSE(notmiwae, Xtest, X_test_z, X_test_nan, S_test, L)
-        RMSE_notmiwae_linear.append(rmse)
-        #ML_notmiwae_linear.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
+        # # ---- find imputation RMSE
+        # #rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtrain, Xz, Xnan, S, L)
+        # rmse, Ximp = utils.imputationRMSE(notmiwae, Xtest, X_test_z, X_test_nan, S_test, L)
+        # RMSE_notmiwae_linear.append(rmse)
+        # #ML_notmiwae_linear.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
 
 
 
@@ -205,10 +206,10 @@ def run_one(multiple_block=None,rule_name = None):
         # ------------------------- #
         # ---- mean imputation ---- #
         # ------------------------- #
-        imp = SimpleImputer(missing_values=np.nan, strategy='mean')
-        imp.fit(Xnan)
-        Ximp = imp.transform(X_test_nan)
-        RMSE_mean.append(np.sqrt(np.sum((Xtest - Ximp) ** 2 * (1 - S_test)) / np.sum(1 - S_test)))
+        # imp = SimpleImputer(missing_values=np.nan, strategy='mean')
+        # imp.fit(Xnan)
+        # Ximp = imp.transform(X_test_nan)
+        # RMSE_mean.append(np.sqrt(np.sum((Xtest - Ximp) ** 2 * (1 - S_test)) / np.sum(1 - S_test)))
         
         #ML_mean.append(utils.downstream(Ximp, Ytrain, Xtest, Ytest, dataset))
 
@@ -254,3 +255,7 @@ if mechanism == "quantile":
 
 else:
     run_one()
+
+
+
+

@@ -202,11 +202,11 @@ def preprocessing(url):
     return data.shape, Xtrain, Xval_org, Xtest, Ytrain, Yval_org, Ytest,dl
 
 
-def load_data_index(dataname,missing_type,missing_name,seed = 1):
+def load_data_index(args,rule_name):
     print(os.getcwd())
 
     processed_data_path_norm = (
-            f"../datasets/{dataname}/{missing_type}-{missing_name}_seed-{seed}_max-min_norm.pk"
+            f"../datasets/{args.dataset}/{args.missingtype}-{rule_name}_seed-{args.seed}_max-min_norm.pk"
         )
     with open(processed_data_path_norm, "rb") as f:
             observed_values, observed_masks, gt_masks, eval_length = pickle.load(
@@ -219,7 +219,7 @@ def load_data_index(dataname,missing_type,missing_name,seed = 1):
     
     indlist = np.arange(N)
 
-    np.random.seed(seed + 1)
+    np.random.seed(args.seed + 1)
     np.random.shuffle(indlist)
 
     tmp_ratio = 1 / 5

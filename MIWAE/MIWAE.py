@@ -165,6 +165,7 @@ class MIWAE:
             svars.append(self.global_step)
             self.saver = tf.train.Saver(svars)
         else:
+            pass
             self.saver = tf.train.Saver()
 
         tf.summary.scalar('Evaluation/loss', self.loss)
@@ -365,12 +366,14 @@ class MIWAE:
 
     def save(self, name):
         print("Saving session...")
-        self.saver.save(self.sess, name)
+        pass
+        #self.saver.save(self.sess, name)
 
     def load(self, name):
         print("Restoring session...")
-        self.saver.restore(self.sess, name)
-        print("Session restored from global step ", self.sess.run(self.global_step))
+        pass
+        #self.saver.restore(self.sess, name)
+        #print("Session restored from global step ", self.sess.run(self.global_step))
 
     @staticmethod
     def gauss_loss(x, s, mu, log_sig2):
