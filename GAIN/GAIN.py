@@ -30,10 +30,10 @@ if missing_type == "quantile":
     "Q2_Q4_complete","Q2_Q4_partial","Q3_Q4_complete","Q3_Q4_partial"]
 
 elif missing_type == "diffuse":
-    missing_rule = [0.5,0.75,0.25]
+    missing_rule = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
 
 elif missing_type =="logistic":
-    missing_rule = [0.5,0.75,0.25]
+    missing_rule = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
 
 
 #%% System Parameters
