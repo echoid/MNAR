@@ -1,0 +1,11 @@
+{"Q1_Q2_partial": {"1": {"lower": 0.0, "upper": 0.25, "partial_missing": 0.0},"2": {"lower": 0.25, "upper": 0.5, "partial_missing": 0.0}}, 
+"Q1_Q3_complete": {"1": {"lower": 0.0, "upper": 0.25, "partial_missing": 0.0}, "2": {"lower": 0.5, "upper": 0.75, "partial_missing": 0.0}}, 
+"Q1_Q4_complete": {"1": {"lower": 0.0, "upper": 0.25, "partial_missing": 0.0}, "2": {"lower": 0.75, "upper": 1, "partial_missing": 0.0}}, 
+"Q2_Q3_complete": {"1": {"lower": 0.25, "upper": 0.5, "partial_missing": 0.0}, "2": {"lower": 0.5, "upper": 0.75, "partial_missing": 0.0}}, 
+"Q2_Q4_complete": {"1": {"lower": 0.25, "upper": 0.5, "partial_missing": 0.0}, "2": {"lower": 0.75, "upper": 1, "partial_missing": 0.0}}, 
+"Q3_Q4_complete": {"1": {"lower": 0.5, "upper": 0.75, "partial_missing": 0.0}, "2": {"lower": 0.75, "upper": 1, "partial_missing": 0.0}}, 
+"Q1_complete": {"1": {"lower": 0.0, "upper": 0.25, "partial_missing": 0.0}},  
+"Q2_complete": {"1": {"lower": 0.25, "upper": 0.5, "partial_missing": 0}},  
+"Q3_complete": {"1": {"lower": 0.5, "upper": 0.75, "partial_missing": 0.0}}, 
+"Q4_complete": {"1": {"lower": 0.75, "upper": 1, "partial_missing": 0.0}}
+}

@@ -7,6 +7,7 @@ import os
 import sys
 import torch
 import argparse
+from tqdm import tqdm
 sys.path.append(os.getcwd())
 from hyperimpute.plugins.imputers import Imputers, ImputerPlugin
 from hyperimpute.plugins.utils.metrics import RMSE
@@ -32,6 +33,7 @@ def run_one(args, rule_name):
 
 
     n, d = data_shape
+    print(n,d)
         # If the batch size is larger than half the dataset's size,
                     # it will be redefined in the imputation methods.
 
@@ -65,16 +67,30 @@ def run_one(args, rule_name):
     # Xtest = torch.from_numpy(Xtest)
     # X_test_nan = torch.from_numpy(X_test_nan)
 
-    
+    na_columns = np.all(np.isnan(X_test_nan), axis=0)
+
+    # Choose a random column from those with all NaN values
+    if np.any(na_columns):
+        column_to_fill = np.random.choice(np.where(na_columns)[0])
+
+        # Find the index of a row with NaN in the chosen column
+        row_index = np.where(np.isnan(X_test_nan[:, column_to_fill]))[0]
+
+        # Generate a random value in the range [0, 1]
+        random_value = np.random.uniform(0, 1)
+
+        # Fill the selected row in the chosen column with the random value
+        X_test_nan[row_index[0], column_to_fill] = random_value
 
     # ------------------- #
     # ---- Sinkhorn ---- #
     # ------------------- #
-
     ctx = imputers.get("hyperimpute")
     x_imp = ctx.fit_transform(X_test_nan)
 
+ 
 
+    print(rule_name,"Hyper Impute done")
     hyper_rmse =  np.sqrt(np.sum((Xtest - x_imp.values) ** 2 * (1 - Xtest_mask)) / np.sum(1 - Xtest_mask))
 
     x_imp.to_csv("../results/hyperimputer/Imputation_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name),index=False)
@@ -88,7 +104,8 @@ def run_one(args, rule_name):
     #Create the imputation models
     ctx = imputers.get("miracle")
     x_imp = ctx.fit_transform(X_test_nan)
-
+    
+    print(rule_name,"miracle Impute done")
     miracle_rmse = np.sqrt(np.sum((Xtest - x_imp.values) ** 2 * (1 - Xtest_mask)) / np.sum(1 - Xtest_mask))
     x_imp.to_csv("../results/miracle/Imputation_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name),index=False)
 
@@ -154,7 +171,7 @@ miracle_rmse_list =  []
 
 
 
-for rule_name in missing_rule:
+for rule_name in tqdm(missing_rule):
 
     hyper_rmse, miracle_rmse = run_one(args, rule_name)
 
