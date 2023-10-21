@@ -95,7 +95,7 @@ if __name__ == "__main__":
     parser.add_argument('--n-epochs', type=int, default=500)
     parser.add_argument('--drp-impt', type=float, default=0.2)
     parser.add_argument('--lr', type=float, default=1e-4)
-    parser.add_argument('--use-cuda', type=util.str2bool, default=True)
+    parser.add_argument('--use-cuda', type=util.str2bool, default=False)
 
 
     parser.add_argument('--dataset', type = str, default ="wine_quality_red" )
@@ -126,5 +126,5 @@ if __name__ == "__main__":
         rule_list.append(rule_name)
 
     result = pd.DataFrame({"Missing_Rule":rule_list,"Imputer RMSE":rmse_list})
-    result.to_csv("../results/mcflow/RMSE_{}_{}.csv".format(args.dataset,args.rule_name),index=False)
+    result.to_csv("../results/mcflow/RMSE_{}_{}.csv".format(args.dataset,args.missingtype),index=False)
     print("Experiment completed")

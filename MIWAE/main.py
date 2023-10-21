@@ -79,18 +79,18 @@ def run_one(args, rule_name):
 
 
 
-        # ---------------------- #
-        # ---- fit not-MIWAE---- #
-        # ---------------------- #
-        notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=args.n_samples, n_hidden=args.n_hidden, missing_process="selfmasking_known", name="notmiwae")
+        # # ---------------------- #
+        # # ---- fit not-MIWAE---- #
+        # # ---------------------- #
+        # notmiwae = notMIWAE(Xnan, Xval, n_latent=dl, n_samples=args.n_samples, n_hidden=args.n_hidden, missing_process="selfmasking_known", name="notmiwae")
 
-        # ---- do the training
-        trainer.train(notmiwae, batch_size=args.batch_size, max_iter=args.max_iter, name='notmiwae')
+        # # ---- do the training
+        # trainer.train(notmiwae, batch_size=args.batch_size, max_iter=args.max_iter, name='notmiwae')
 
-        # ---- find imputation RMSE
-        rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtest, X_test_z, X_test_nan, S_test, args.L)
-        pd.DataFrame(Ximp).to_csv("results/notmiwae/Imputation_{}_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name,run),index=False)
-        RMSE_notmiwae.append(rmse)
+        # # ---- find imputation RMSE
+        # rmse,Ximp = utils.not_imputationRMSE(notmiwae, Xtest, X_test_z, X_test_nan, S_test, args.L)
+        # pd.DataFrame(Ximp).to_csv("results/notmiwae/Imputation_{}_{}_{}_{}.csv".format(args.dataset,args.missingtype,rule_name,run),index=False)
+        # RMSE_notmiwae.append(rmse)
         
 
 
@@ -99,7 +99,7 @@ def run_one(args, rule_name):
 
     #print("RMSE_mean = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_mean), np.std(RMSE_mean)))
     print("RMSE_miwae = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_miwae), np.std(RMSE_miwae)))
-    print("RMSE_notmiwae selfmasking_known = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae), np.std(RMSE_notmiwae)))
+    #print("RMSE_notmiwae selfmasking_known = {0:.5f} +- {1:.5f}".format(np.mean(RMSE_notmiwae), np.std(RMSE_notmiwae)))
 
 
     return np.mean(RMSE_miwae), np.std(RMSE_miwae), np.mean(RMSE_notmiwae), np.std(RMSE_notmiwae)
@@ -154,6 +154,6 @@ result = pd.DataFrame({"Missing_Rule":rule_list,"MIWAE_RMSE":miwae_rmse_list,"MI
 result.to_csv("results/miwae/RMSE_{}_{}.csv".format(args.dataset,args.missingpara),index=False)
 
 
-result = pd.DataFrame({"Missing_Rule":rule_list,"NotMIWAE_RMSE":notmiwae_rmse_list,"NotMIWAE_STD":notmiwae_rmse_std_list})
-result.to_csv("results/notmiwae/RMSE_{}_{}.csv".format(args.dataset,args.missingpara),index=False)
+# result = pd.DataFrame({"Missing_Rule":rule_list,"NotMIWAE_RMSE":notmiwae_rmse_list,"NotMIWAE_STD":notmiwae_rmse_std_list})
+# result.to_csv("results/notmiwae/RMSE_{}_{}.csv".format(args.dataset,args.missingpara),index=False)
 print("Experiment completed")

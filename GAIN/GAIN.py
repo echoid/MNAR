@@ -25,9 +25,16 @@ dataset_file = sys.argv[1]
 
 if missing_type == "quantile":
 
-    missing_rule = ["Q1_complete","Q1_partial","Q2_complete","Q2_partial","Q3_complete","Q3_partial","Q4_complete","Q4_partial",
-    "Q1_Q2_complete","Q1_Q2_partial","Q1_Q3_complete","Q1_Q3_partial","Q1_Q4_complete","Q1_Q4_partial","Q2_Q3_complete","Q2_Q3_partial",
-    "Q2_Q4_complete","Q2_Q4_partial","Q3_Q4_complete","Q3_Q4_partial"]
+    missing_rule = ["Q1_0.25","Q1_0.5","Q1_0.75","Q1_1.0",
+                "Q2_0.25","Q2_0.5","Q2_0.75","Q2_1.0",
+                "Q3_0.25","Q3_0.5","Q3_0.75","Q3_1.0",
+                "Q4_0.25","Q4_0.5","Q4_0.75","Q4_1.0",
+    "Q1_Q2_0.25","Q1_Q2_0.5","Q1_Q2_0.75","Q1_Q2_1.0",
+    "Q1_Q3_0.25","Q1_Q3_0.5","Q1_Q3_0.75","Q1_Q3_1.0",
+    "Q1_Q4_0.25","Q1_Q4_0.5","Q1_Q4_0.75","Q1_Q4_1.0",
+    "Q2_Q3_0.25","Q2_Q3_0.5","Q2_Q3_0.75","Q2_Q3_1.0",
+    "Q2_Q4_0.25","Q2_Q4_0.5","Q2_Q4_0.75","Q2_Q4_1.0",
+    "Q3_Q4_0.25","Q3_Q4_0.5","Q3_Q4_0.75","Q3_Q4_1.0"]
 
 elif missing_type == "diffuse":
     missing_rule = [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9]
@@ -252,7 +259,7 @@ def run(dataset_file,missing_rule):
 
         Imputer_RMSE.append(round(rmse_final.item(),5))
 
-        #pd.DataFrame(torch.cat(imputed_total, 0).detach().numpy()).to_csv("results/gain/Imputation_{}_{}_{}.csv".format(dataset_file,missing_type,rule_name),index=False)
+        pd.DataFrame(torch.cat(imputed_total, 0).detach().numpy()).to_csv("results/gain/Imputation_{}_{}_{}.csv".format(dataset_file,missing_type,rule_name),index=False)
   
 
         print('Final Test RMSE: {:.4f}'.format(rmse_final.item()))
