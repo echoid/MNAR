@@ -395,7 +395,7 @@ class notMIWAE:
 
     def val_batch(self):
 
-        batch_size = 50
+        batch_size = 10
         val_loss = 0.0
         pxz = 0.0
         psx = 0.0
@@ -418,6 +418,9 @@ class notMIWAE:
             pz += np.mean(_pz)
             qzx += np.mean(_qzx)
 
+        if n_val_batches == 0:
+            n_val_batches = 1
+
         val_loss /= n_val_batches
         pxz /= n_val_batches
         psx /= n_val_batches
@@ -430,6 +433,7 @@ class notMIWAE:
         summary.value.add(tag="Evaluation/psx", simple_value=psx)
         summary.value.add(tag="Evaluation/qzx", simple_value=qzx)
         summary.value.add(tag="Evaluation/pz", simple_value=pz)
+
 
         self.val_writer.add_summary(summary, _step)
         self.val_writer.flush()

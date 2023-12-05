@@ -292,7 +292,7 @@ class MIWAE:
 
     def val_batch(self):
 
-        batch_size = 50
+        batch_size = 10
         val_loss = 0.0
         pxz = 0.0
         pz = 0.0
@@ -312,6 +312,9 @@ class MIWAE:
             pxz += np.mean(_pxz)
             pz += np.mean(_pz)
             qzx += np.mean(_qzx)
+
+        if n_val_batches == 0:
+            n_val_batches = 1
 
         val_loss /= n_val_batches
         pxz /= n_val_batches

@@ -5,6 +5,7 @@ import torch
 import numpy as np
 import os
 import pickle
+import random
 
 from scipy import optimize
 
@@ -40,6 +41,13 @@ def quantile(X, q, dim=None):
         quantiles : torch.DoubleTensor
 
     """
+
+    if dim is None:
+        X = X.view(-1)  # Flatten the tensor
+    
+    if len(X) == 0:
+        raise ValueError("Input tensor has zero elements along the specified dimension.")
+
     return X.kthvalue(int(q * len(X)), dim=dim)[0]
 
 
@@ -77,7 +85,17 @@ def pick_epsilon(X, quant=0.5, mult=0.05, max_points=2000):
     idx = np.random.choice(len(X_), min(max_points, len(X_)), replace=False)
     X = X_[idx]
     dists = ((X[:, None] - X) ** 2).sum(2).flatten() / 2.
+
+    # debug
+    if torch.all(torch.isnan(dists)):
+        random_index = random.randint(0, len(dists) - 1)
+        dists[random_index] = 1
+   
+
     dists = dists[dists > 0]
+ 
+
+    print(dists, quant)
 
     return quantile(dists, quant, 0).item() * mult
 

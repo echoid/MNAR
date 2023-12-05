@@ -132,6 +132,8 @@ class OTimputer():
         for i in range(self.niter):
 
             X_filled = X.detach().clone()
+            X_filled = X_filled.float()  # Convert X_filled to Float
+            mask = mask.float()  # Convert X_filled to Float
             X_filled[mask.bool()] = imps
             loss = 0
             
